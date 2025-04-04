@@ -53,7 +53,10 @@
 
     <!-- 功能按鈕區 -->
     <div class="mt-4 d-flex gap-2 flex-wrap">
-      <button class="btn btn-primary" @click="generateText()">生成文字並複製</button>
+      <button class="btn btn-primary" @click="generateText()">生成文字並複製(會直接複製喔!)</button>
+      <button class="btn btn-outline-primary" @click="toggleSelectAll()">
+        <span x-text="isAllChecked() ? '取消全選' : '全選'"></span>
+      </button>
     </div>
 
     <!-- 顯示結果 -->
@@ -110,10 +113,10 @@
         },
 
         generateText() {
-          let text = '';
+          let text = '日期: ' + new Date().toLocaleDateString() +';'+ '\n\n';
           this.items.forEach(item => {
             if (item.checked && item.count > 0) {
-              text += `${item.product_name}:${item.count};\n`; // ✅ 這裡改格式
+              text += `${item.product_name}:${item.count};\n`;
             }
           });
           this.$refs.outputText.value = text;
@@ -127,7 +130,19 @@
 
         resetAll() {
           localStorage.removeItem('productData');
-          this.init(); // 重新載入初始資料
+          this.init();
+        },
+
+        isAllChecked() {
+          return this.items.length > 0 && this.items.every(item => item.checked);
+        },
+
+        toggleSelectAll() {
+          const newState = !this.isAllChecked();
+          this.items.forEach(item => {
+            item.checked = newState;
+          });
+          this.saveToLocalStorage();
         }
       };
     }
