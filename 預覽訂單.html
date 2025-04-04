@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>產品計算表</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+  <div class="container my-5" x-data="productApp()">
+    <h2 class="mb-4">產品清單</h2>
+    <table class="table table-bordered table-striped">
+      <thead class="table-primary text-center">
+        <tr>
+          <th>品名</th>
+          <th>單價</th>
+          <th>數量</th>
+          <th>總價</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="item in items" :key="item.product_name">
+          <tr class="text-center">
+            <td x-text="item.product_name"></td>
+            <td>
+              <input type="number" class="form-control" x-model.number="item.price" @input="update(item)">
+            </td>
+            <td>
+              <input type="number" class="form-control" x-model.number="item.count" @input="update(item)">
+            </td>
+            <td x-text="item.total.toFixed(2)"></td>
+          </tr>
+        </template>
+      </tbody>
+      <tfoot>
+        <tr class="table-info text-end">
+          <td colspan="3"><strong>應收總金額</strong></td>
+          <td><strong x-text="calculateTotal().toFixed(2)"></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- 複製文字按鈕 -->
+    <div class="mt-4">
+      <button class="btn btn-primary" @click="generateText()">生成文字並複製</button>
+      <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
+    </div>
+  </div>
+
+  <script>
+    function productApp() {
+      return {
+        items: [],
+        init() {
+          // 從外部 JSON 檔案載入資料
+          fetch('products.json')
+            .then(response => response.json())
+            .then(data => {
+              this.items = data; 
+            })
+            .catch(error => console.error('無法載入資料:', error));
+        },
+        update(item) {
+          item.total = (item.count || 0) * (item.price || 0);
+        },
+        calculateTotal() {
+          return this.items.reduce((sum, item) => sum + (item.total || 0), 0);
+        },
+        generateText() {
+          let text = '';
+          this.items.forEach(item => {
+            if (item.count > 0) {
+              text += `${item.product_name} : ${item.count} ;\n`;
+            }
+          });
+          this.$refs.outputText.value = text;
+          this.copyToClipboard();
+        },
+        copyToClipboard() {
+          this.$refs.outputText.select();
+          document.execCommand('copy');
+        }
+      };
+    }
+  </script>
+</body>
+</html>
