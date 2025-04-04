@@ -25,7 +25,7 @@
     <table class="table table-bordered table-striped">
       <thead class="table-primary text-center">
         <tr>
-          <th>選擇</th>
+          <th>清點</th>
           <th>品名</th>
           <th>單價</th>
           <th>數量</th>
@@ -112,7 +112,7 @@
         generateText() {
           let text = '';
           this.items.forEach(item => {
-            if (item.count > 0) {
+            if (item.checked && item.count > 0) {
               text += `${item.product_name}:${item.count};\n`; // ✅ 這裡改格式
             }
           });
