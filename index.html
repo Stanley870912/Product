@@ -9,14 +9,19 @@
 </head>
 <body>
   <div class="container my-5" x-data="productApp()" x-init="init()">
-    <h2 class="mb-4">產品清單</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
 
-    <!-- 切換顯示按鈕 -->
-    <button class="btn btn-secondary mb-3" @click="showOnlyWithCount = !showOnlyWithCount">
-      <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
-    </button>
+      <h2>產品清單</h2>
+  
+      <!-- 顯示切換 -->
+      <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
+        <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
+      </button>
+  
+      <button class="btn btn-danger" @click="resetAll()">重置</button>
 
-    <!-- 表格 -->
+    </div>
+    <!-- 商品表格 -->
     <table class="table table-bordered table-striped">
       <thead class="table-primary text-center">
         <tr>
@@ -30,9 +35,9 @@
       <tbody>
         <template x-for="item in items" :key="item.product_name">
           <tr class="text-center" x-show="!showOnlyWithCount || item.count > 0">
-            <td><input type="checkbox" x-model="item.checked"></td>
+            <td><input type="checkbox" x-model="item.checked" @change="saveToLocalStorage()"></td>
             <td x-text="item.product_name"></td>
-            <td><input type="number" class="form-control" x-model.number="item.price" @input="update(item)"></td>
+            <td x-text="item.price"></td>
             <td><input type="number" class="form-control" x-model.number="item.count" @input="update(item)"></td>
             <td x-text="item.total.toFixed(2)"></td>
           </tr>
@@ -46,39 +51,62 @@
       </tfoot>
     </table>
 
-    <!-- 複製文字按鈕 -->
-    <div class="mt-4">
+    <!-- 功能按鈕區 -->
+    <div class="mt-4 d-flex gap-2 flex-wrap">
       <button class="btn btn-primary" @click="generateText()">生成文字並複製</button>
-      <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
     </div>
+    <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
   </div>
 
-  <!-- Alpine.js 程式邏輯 -->
   <script>
     function productApp() {
       return {
         items: [],
         showOnlyWithCount: false,
+
         init() {
           fetch('products.json')
             .then(response => response.json())
             .then(data => {
-              this.items = data.map(item => ({
-                ...item,
-                count: item.count || 0,
-                price: item.price || 0,
-                total: 0,
-                checked: false
-              }));
+              const savedData = JSON.parse(localStorage.getItem('productData') || '{}');
+
+              this.items = data.map(item => {
+                const saved = savedData[item.product_name] || {};
+                const count = saved.count || 0;
+                const checked = saved.checked || false;
+                const total = count * item.price;
+
+                return {
+                  ...item,
+                  count,
+                  total,
+                  checked
+                };
+              });
             })
             .catch(error => console.error('無法載入資料:', error));
         },
+
         update(item) {
           item.total = (item.count || 0) * (item.price || 0);
+          this.saveToLocalStorage();
         },
+
+        saveToLocalStorage() {
+          const dataToSave = {};
+          this.items.forEach(item => {
+            dataToSave[item.product_name] = {
+              count: item.count,
+              checked: item.checked
+            };
+          });
+          localStorage.setItem('productData', JSON.stringify(dataToSave));
+        },
+
         calculateTotal() {
           return this.items.reduce((sum, item) => sum + (item.total || 0), 0);
         },
+
         generateText() {
           let text = '';
           this.items.forEach(item => {
@@ -89,9 +117,15 @@
           this.$refs.outputText.value = text;
           this.copyToClipboard();
         },
+
         copyToClipboard() {
           this.$refs.outputText.select();
           document.execCommand('copy');
+        },
+
+        resetAll() {
+          localStorage.removeItem('productData');
+          this.init(); // 重新載入初始資料
         }
       };
     }
