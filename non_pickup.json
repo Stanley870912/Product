@@ -2,6 +2,7 @@
   { "product_name": "大片酥餅(箱)", "price": 960 },
   { "product_name": "小片酥餅-耶子奶(箱)", "price": 960 },
   { "product_name": "小片酥餅-原味(箱)", "price": 960 },
+  
   { "product_name": "鳳眼糕(盒)", "price": 90 },
   { "product_name": "麵茶(包)", "price": 70 },
   { "product_name": "冬瓜肉餅(塊)", "price": 78 },
@@ -9,12 +10,16 @@
   { "product_name": "芝麻鳳梨餅(塊)", "price": 78 },
   { "product_name": "牛舌餅(箱)", "price": 975 },
   { "product_name": "鹹甜梅糕(箱)", "price": 2210 },
+
   { "product_name": "老婆餅(甜)(包)", "price": 11 },
   { "product_name": "老婆餅(鹹)(包)", "price": 11 },
+
   { "product_name": "薄餅(孜然)(包)", "price": 65 },
   { "product_name": "薄餅(原味)(包)", "price": 55 },
   { "product_name": "薄餅(黑芝麻)(包)", "price": 55 },
   { "product_name": "薄餅(黑胡椒)(包)", "price": 55 },
+  { "product_name": "薄餅(黑糖蜂蜜)(包)", "price": 55 },
+
   { "product_name": "杏仁酥(包)", "price": 55 },
   { "product_name": "鳳梨餅(塊)", "price": 28 },
   { "product_name": "紅豆餅(塊)", "price": 28 },
@@ -39,7 +44,6 @@
   { "product_name": "蒜蓉餅(盒)", "price": 90 },
   { "product_name": "鳳凰酥(包)", "price": 160 },
   { "product_name": "五香鹹糕(箱)", "price": 936 },
-  { "product_name": "薄餅(黑糖蜂蜜)(包)", "price": 55 },
   { "product_name": "黑芝麻餅(盒)", "price": 90 },
   { "product_name": "南瓜餅(盒)", "price": 100 },
   { "product_name": "栗子燒(盒)", "price": 105 },

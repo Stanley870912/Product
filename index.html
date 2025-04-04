@@ -12,6 +12,12 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
       <h2>產品清單</h2>
 
+      <!-- 選擇資料來源 -->
+      <select class="form-select w-auto" x-model="currentSource" @change="loadData()" title="選擇資料來源">
+        <option value="non_pickup">送貨</option>
+        <option value="pickup">自取</option>
+      </select>
+
       <!-- 顯示切換 -->
       <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
         <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
@@ -68,13 +74,20 @@
       return {
         items: [],
         showOnlyWithCount: false,
+        currentSource: localStorage.getItem('jsonSource') || 'non_pickup', // 預設來源
 
         init() {
-          fetch('products.json')
+          this.loadData();
+        },
+
+        loadData() {
+          const fileName = this.currentSource === 'pickup' ? 'pickup.json' : 'non_pickup.json';
+          localStorage.setItem('jsonSource', this.currentSource); // 儲存選項
+          const savedData = JSON.parse(localStorage.getItem('productData_' + this.currentSource) || '{}');
+
+          fetch(fileName)
             .then(response => response.json())
             .then(data => {
-              const savedData = JSON.parse(localStorage.getItem('productData') || '{}');
-
               this.items = data.map(item => {
                 const saved = savedData[item.product_name] || {};
                 const count = saved.count || 0;
@@ -105,7 +118,7 @@
               checked: item.checked
             };
           });
-          localStorage.setItem('productData', JSON.stringify(dataToSave));
+          localStorage.setItem('productData_' + this.currentSource, JSON.stringify(dataToSave));
         },
 
         calculateTotal() {
@@ -113,7 +126,7 @@
         },
 
         generateText() {
-          let text = '日期: ' + new Date().toLocaleDateString() +';'+ '\n\n';
+          let text = '日期: ' + new Date().toLocaleDateString() + ';\n\n';
           this.items.forEach(item => {
             if (item.checked && item.count > 0) {
               text += `${item.product_name}:${item.count};\n`;
@@ -129,8 +142,8 @@
         },
 
         resetAll() {
-          localStorage.removeItem('productData');
-          this.init();
+          localStorage.removeItem('productData_' + this.currentSource);
+          this.loadData();
         },
 
         isAllChecked() {
