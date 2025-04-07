@@ -116,7 +116,7 @@
   </template>
 
   <div class="modal fade" id="easterEggModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-warning">
         <div class="modal-header bg-warning text-dark">
           <h5 class="modal-title">🎁 彩蛋觸發</h5>
@@ -166,9 +166,6 @@
 
         loadData() {
           const fileName = this.authorized == true ? 'non_pickup.json' : 'error.json';
-          // if(this.authorized == true && Math.random() < 1) {
-          //   alert('🎁 彩蛋限定\n招財進寶，業績爆棚！');
-          // } 
 
           if (this.authorized == true && Math.random() < 1) {
                 const modal = new bootstrap.Modal(document.getElementById('easterEggModal'));
