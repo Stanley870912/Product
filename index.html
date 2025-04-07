@@ -148,7 +148,7 @@
 
         loadData() {
           const fileName = this.authorized == true ? 'non_pickup.json' : 'error.json';
-          if(this.authorized == true && Math.random() < 0.1) {
+          if(this.authorized == true && Math.random() < 0.01) {
             alert('🎁 彩蛋限定｜招財進寶，業績爆棚！');
           } 
           localStorage.setItem('jsonSource', this.currentSource);
