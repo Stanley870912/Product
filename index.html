@@ -4,114 +4,135 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>試算表</title>
-  <script>
-    const password = prompt("請輸入密碼才能進入：");
-    if (password !== "1234") {
-      alert("密碼錯誤！無法進入!");
-    }
-  </script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
-<body>
-  <div class="container my-5" x-data="productApp()" x-init="init()">
-    <h2 class="text-center">產品清單</h2>
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-      <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
-        <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
-      </button> 
-      <button class="btn btn-danger" @click="resetAll()">重置</button>
-    </div>
+<body x-data="productApp()" x-init="authCheck()">
 
-    <!-- 餅類表格 -->
-    <h4>餅類</h4>
-    <table class="table table-bordered table-striped">
-      <thead class="table-primary text-center">
-        <tr>
-          <th>清點</th>
-          <th>品名</th>
-          <th>單價</th>
-          <th>數量</th>
-          <th>總價</th>
-        </tr>
-      </thead>
-      <tbody>
-        <template x-for="item in otherItems()" :key="item.product_name">
-          <tr class="text-center" x-show="!showOnlyWithCount || item.count != 0">
-            <td><input type="checkbox" x-model="item.checked" @change="saveToLocalStorage()"></td>
-            <td x-text="item.product_name"></td>
-            <td x-text="item.price"></td>
-            <td><input type="number" class="form-control" x-model.number="item.count" @input="update(item)"></td>
-            <td x-text="item.total.toFixed(2)"></td>
+  <!-- ✅ 密碼正確才顯示的區塊 -->
+  <template x-if="authorized">
+    <div class="container my-5">
+      <h2 class="text-center">產品清單</h2>
+
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
+          <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
+        </button> 
+        <button class="btn btn-danger" @click="resetAll()">重置</button>
+      </div>
+
+      <!-- 餅類表格 -->
+      <h4>餅類</h4>
+      <table class="table table-bordered table-striped">
+        <thead class="table-primary text-center">
+          <tr>
+            <th>清點</th>
+            <th>品名</th>
+            <th>單價</th>
+            <th>數量</th>
+            <th>總價</th>
           </tr>
-        </template>
-      </tbody>
-      <tfoot>
-        <tr class="table-info text-end">
-          <td colspan="4"><strong>餅類小計</strong></td>
-          <td><strong x-text="calculateOtherGroupsTotal().toFixed(2)"></strong></td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <!-- 零食 表格 -->
-    <h4>零食類</h4>
-    <table class="table table-bordered table-striped">
-      <thead class="table-warning text-center">
-        <tr>
-          <th>清點</th>
-          <th>品名</th>
-          <th>單價</th>
-          <th>數量</th>
-          <th>總價</th>
-        </tr>
-      </thead>
-      <tbody>
-        <template x-for="item in group9Items()" :key="item.product_name">
-          <tr class="text-center" x-show="!showOnlyWithCount || item.count > 0">
-            <td><input type="checkbox" x-model="item.checked" @change="saveToLocalStorage()"></td>
-            <td x-text="item.product_name"></td>
-            <td x-text="item.price"></td>
-            <td><input type="number" class="form-control" x-model.number="item.count" @input="update(item)"></td>
-            <td x-text="item.total.toFixed(2)"></td>
+        </thead>
+        <tbody>
+          <template x-for="item in otherItems()" :key="item.product_name">
+            <tr class="text-center" x-show="!showOnlyWithCount || item.count != 0">
+              <td><input type="checkbox" x-model="item.checked" @change="saveToLocalStorage()"></td>
+              <td x-text="item.product_name"></td>
+              <td x-text="item.price"></td>
+              <td><input type="number" class="form-control" x-model.number="item.count" @input="update(item)"></td>
+              <td x-text="item.total.toFixed(2)"></td>
+            </tr>
+          </template>
+        </tbody>
+        <tfoot>
+          <tr class="table-info text-end">
+            <td colspan="4"><strong>餅類小計</strong></td>
+            <td><strong x-text="calculateOtherGroupsTotal().toFixed(2)"></strong></td>
           </tr>
-        </template>
-      </tbody>
-      <tfoot>
-        <tr class="table-warning text-end">
-          <td colspan="4"><strong>零食類小計</strong></td>
-          <td><strong x-text="calculateGroup9Total().toFixed(2)"></strong></td>
-        </tr>
-      </tfoot>
-    </table>
+        </tfoot>
+      </table>
 
-    <!-- 總金額 -->
-    <div class="text-end my-3">
-      <h5>應收總金額：<span x-text="calculateTotal().toFixed(2)"></span></h5>
+      <!-- 零食類表格 -->
+      <h4>零食類</h4>
+      <table class="table table-bordered table-striped">
+        <thead class="table-warning text-center">
+          <tr>
+            <th>清點</th>
+            <th>品名</th>
+            <th>單價</th>
+            <th>數量</th>
+            <th>總價</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="item in group9Items()" :key="item.product_name">
+            <tr class="text-center" x-show="!showOnlyWithCount || item.count > 0">
+              <td><input type="checkbox" x-model="item.checked" @change="saveToLocalStorage()"></td>
+              <td x-text="item.product_name"></td>
+              <td x-text="item.price"></td>
+              <td><input type="number" class="form-control" x-model.number="item.count" @input="update(item)"></td>
+              <td x-text="item.total.toFixed(2)"></td>
+            </tr>
+          </template>
+        </tbody>
+        <tfoot>
+          <tr class="table-warning text-end">
+            <td colspan="4"><strong>零食類小計</strong></td>
+            <td><strong x-text="calculateGroup9Total().toFixed(2)"></strong></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- 總金額 -->
+      <div class="text-end my-3">
+        <h5>應收總金額：<span x-text="calculateTotal().toFixed(2)"></span></h5>
+      </div>
+
+      <span class="text-danger m-2"> 有打勾的才會顯示在文字區域中喔 ! </span>
+
+      <!-- 功能按鈕 -->
+      <div class="mt-4 d-flex gap-2 flex-wrap">
+        <button class="btn btn-primary" @click="generateText()">生成文字並複製(會直接複製喔!)</button>
+        <button class="btn btn-outline-primary" @click="toggleSelectAll()">
+          <span x-text="isAllChecked() ? '取消全選' : '全選'"></span>
+        </button>
+        <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
+          <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
+        </button>
+      </div>
+
+      <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
     </div>
+  </template>
 
-    <span class="text-danger m-2"> 有打勾的才會顯示在文字區域中喔 ! </span>
-
-    <!-- 功能按鈕區 -->
-    <div class="mt-4 d-flex gap-2 flex-wrap">
-      <button class="btn btn-primary" @click="generateText()">生成文字並複製(會直接複製喔!)</button>
-      <button class="btn btn-outline-primary" @click="toggleSelectAll()">
-        <span x-text="isAllChecked() ? '取消全選' : '全選'"></span>
-      </button>
-      <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
-        <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
-      </button>
+  <!-- ❌ 密碼錯誤才會顯示的畫面 -->
+  <template x-if="!authorized">
+    <div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div class="text-center">
+        <h3 class="text-danger">密碼錯誤，無法進入</h3>
+        <p>請重新整理頁面以再次輸入密碼</p>
+      </div>
     </div>
+  </template>
 
-    <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
-  </div>
-
+  <!-- Alpine.js app 定義 -->
   <script>
     function productApp() {
       return {
         items: [],
         showOnlyWithCount: false,
         currentSource: 'non_pickup',
+        authorized: false,
+
+        authCheck() {
+          const password = prompt("請輸入密碼才能進入：");
+          if (password === "1234") {
+            this.authorized = true;
+            this.init();
+          } else {
+            this.authorized = false;
+          }
+        },
 
         init() {
           this.loadData();
@@ -223,4 +244,3 @@
   </script>
 </body>
 </html>
-
