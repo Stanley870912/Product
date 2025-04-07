@@ -115,6 +115,24 @@
     </div>
   </template>
 
+  <div class="modal fade" id="easterEggModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content border-warning">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title">🎁 彩蛋觸發</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p class="fs-5">招財進寶，業績爆棚！</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+
+
   <!-- Alpine.js app 定義 -->
   <script>
     function productApp() {
@@ -148,9 +166,14 @@
 
         loadData() {
           const fileName = this.authorized == true ? 'non_pickup.json' : 'error.json';
-          if(this.authorized == true && Math.random() < 1) {
-            alert('🎁 彩蛋限定\n招財進寶，業績爆棚！');
-          } 
+          // if(this.authorized == true && Math.random() < 1) {
+          //   alert('🎁 彩蛋限定\n招財進寶，業績爆棚！');
+          // } 
+
+          if (this.authorized == true && Math.random() < 1) {
+                const modal = new bootstrap.Modal(document.getElementById('easterEggModal'));
+                modal.show();
+              }
           localStorage.setItem('jsonSource', this.currentSource);
           const savedData = JSON.parse(localStorage.getItem('productData_' + this.currentSource) || '{}');
 
