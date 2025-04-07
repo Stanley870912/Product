@@ -125,12 +125,21 @@
         authorized: false,
 
         authCheck() {
-          const password = prompt("請輸入密碼才能進入：");
-          if (password === "1234") {
+          const lastLoginTime = localStorage.getItem('lastLoginTime');
+          const now = Date.now();
+
+          if (lastLoginTime && now - Number(lastLoginTime) < 57600000) {
             this.authorized = true;
             this.init();
           } else {
-            this.authorized = false;
+            const password = prompt("請輸入密碼才能進入：");
+            if (password === "1234") {
+              localStorage.setItem('lastLoginTime', now);
+              this.authorized = true;
+              this.init();
+            } else {
+              this.authorized = false;
+            }
           }
         },
 
