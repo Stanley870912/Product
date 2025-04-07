@@ -129,19 +129,20 @@
 
           if (lastLoginTime && now - Number(lastLoginTime) < 57600000) { // 16小時57600000
             this.authorized = true;
-            this.init();
+            this.loadData();
           } else {
             const password = prompt("請輸入密碼才能進入：");
             if (password === "1234") {
               localStorage.setItem('lastLoginTime', now);
               this.authorized = true;
-              this.init();
+              this.loadData();
             } else {
               this.authorized = false;
             }
           }
-        },
 
+
+        },
         init() {
           this.loadData();
         },
