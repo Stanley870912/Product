@@ -144,13 +144,13 @@
 
         },
         init() {
-          this.loadData();
         },
 
         loadData() {
-          const fileName = (this.authorized && Math.random() >= 0.01) 
-                            ? 'non_pickup.json' 
-                            : 'error.json';
+          const fileName = this.authorized == true ? 'non_pickup.json' : 'error.json';
+          if(this.authorized == true && Math.random() < 0.1) {
+            alert('🎁 彩蛋限定｜招財進寶，業績爆棚！');
+          } 
           localStorage.setItem('jsonSource', this.currentSource);
           const savedData = JSON.parse(localStorage.getItem('productData_' + this.currentSource) || '{}');
 
