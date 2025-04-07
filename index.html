@@ -65,7 +65,7 @@
         </tr>
       </thead>
       <tbody>
-        <template x-for="item in group4Items()" :key="item.product_name">
+        <template x-for="item in group9Items()" :key="item.product_name">
           <tr class="text-center" x-show="!showOnlyWithCount || item.count > 0">
             <td><input type="checkbox" x-model="item.checked" @change="saveToLocalStorage()"></td>
             <td x-text="item.product_name"></td>
@@ -78,7 +78,7 @@
       <tfoot>
         <tr class="table-warning text-end">
           <td colspan="4"><strong>零食類小計</strong></td>
-          <td><strong x-text="calculateGroup4Total().toFixed(2)"></strong></td>
+          <td><strong x-text="calculateGroup9Total().toFixed(2)"></strong></td>
         </tr>
       </tfoot>
     </table>
@@ -160,16 +160,16 @@
           localStorage.setItem('productData_' + this.currentSource, JSON.stringify(dataToSave));
         },
 
-        group4Items() {
-          return this.items.filter(item => item.product_group == 4);
+        group9Items() {
+          return this.items.filter(item => item.product_group == 9);
         },
 
         otherItems() {
           return this.items.filter(item => item.product_group != 4);
         },
 
-        calculateGroup4Total() {
-          return this.group4Items().reduce((sum, item) => sum + (item.total || 0), 0);
+        calculateGroup9Total() {
+          return this.group9Items().reduce((sum, item) => sum + (item.total || 0), 0);
         },
 
         calculateOtherGroupsTotal() {
@@ -177,18 +177,27 @@
         },
 
         calculateTotal() {
-          return this.calculateGroup4Total() + this.calculateOtherGroupsTotal();
+          return this.calculateGroup9Total() + this.calculateOtherGroupsTotal();
         },
 
         generateText() {
-          let text = '日期: ' + new Date().toLocaleDateString() + ';\n\n';
-          this.items.forEach(item => {
-            if (item.checked && item.count > 0) {
-              text += `${item.product_name}:${item.count};\n`;
-            }
-          });
-          this.$refs.outputText.value = text;
-          this.copyToClipboard();
+         let text = '日期: ' + new Date().toLocaleDateString() + ';\n\n';
+         let lastGroup = null;
+                
+         this.items.forEach(item => {
+           if (item.checked && item.count > 0) {
+             // 如果換了 product_group，加入一行空白
+             if (item.product_group !== lastGroup) {
+               if (lastGroup !== null) text += '\n'; // 第一次不用加空行
+               lastGroup = item.product_group;
+             }
+           
+             text += `${item.product_name}:${item.count};\n`;
+           }
+         });
+        
+         this.$refs.outputText.value = text;
+         this.copyToClipboard();
         },
 
         copyToClipboard() {
