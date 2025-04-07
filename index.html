@@ -15,9 +15,9 @@
         <option value="non_pickup">送貨</option>
         <option value="pickup">自取</option>
       </select>
-      <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
+      <!-- <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
         <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
-      </button>
+      </button> -->
       <button class="btn btn-danger" @click="resetAll()">重置</button>
     </div>
 
@@ -52,14 +52,8 @@
       </tfoot>
     </table>
 
-  <div class="d-flex justify-content-between mb-2">
     <!-- 零食 表格 -->
     <h4>零食類</h4>
-    <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
-      <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
-    </button>
-
-  </div>
     <table class="table table-bordered table-striped">
       <thead class="table-warning text-center">
         <tr>
@@ -94,12 +88,21 @@
       <h5>應收總金額：<span x-text="calculateTotal().toFixed(2)"></span></h5>
     </div>
 
+    <span class="text-danger m-2"> 有打勾的才會顯示在文字區域中喔 ! </span>
     <!-- 功能按鈕區 -->
     <div class="mt-4 d-flex gap-2 flex-wrap">
+
+
       <button class="btn btn-primary" @click="generateText()">生成文字並複製(會直接複製喔!)</button>
       <button class="btn btn-outline-primary" @click="toggleSelectAll()">
         <span x-text="isAllChecked() ? '取消全選' : '全選'"></span>
       </button>
+
+      <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
+        <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
+      </button>
+
+
     </div>
 
     <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
