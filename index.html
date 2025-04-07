@@ -121,14 +121,13 @@
       return {
         items: [],
         showOnlyWithCount: false,
-        currentSource: 'non_pickup',
         authorized: false,
 
         authCheck() {
           const lastLoginTime = localStorage.getItem('lastLoginTime');
           const now = Date.now();
 
-          if (lastLoginTime && now - Number(lastLoginTime) < 57600000) {
+          if (lastLoginTime && now - Number(lastLoginTime) < 57600000) { // 16小時57600000
             this.authorized = true;
             this.init();
           } else {
@@ -148,7 +147,7 @@
         },
 
         loadData() {
-          const fileName = this.currentSource === 'pickup' ? 'pickup.json' : 'non_pickup.json';
+          const fileName = this.authorized == true ? 'non_pickup.json' : 'error.json';
           localStorage.setItem('jsonSource', this.currentSource);
           const savedData = JSON.parse(localStorage.getItem('productData_' + this.currentSource) || '{}');
 
