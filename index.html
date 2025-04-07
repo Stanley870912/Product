@@ -113,7 +113,8 @@
       return {
         items: [],
         showOnlyWithCount: false,
-        currentSource: localStorage.getItem('jsonSource') || 'non_pickup',
+        // currentSource: localStorage.getItem('jsonSource') || 'non_pickup',
+        currentSource: 'non_pickup',
 
         init() {
           this.loadData();
