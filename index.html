@@ -35,7 +35,7 @@
       </thead>
       <tbody>
         <template x-for="item in otherItems()" :key="item.product_name">
-          <tr class="text-center" x-show="!showOnlyWithCount || item.count > 0">
+          <tr class="text-center" x-show="!showOnlyWithCount || item.count != 0">
             <td><input type="checkbox" x-model="item.checked" @change="saveToLocalStorage()"></td>
             <td x-text="item.product_name"></td>
             <td x-text="item.price"></td>
