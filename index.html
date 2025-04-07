@@ -119,7 +119,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-warning">
         <div class="modal-header bg-warning text-dark">
-          <h5 class="modal-title">🎁 彩蛋觸發</h5>
+          <h5 class="modal-title">🎁 觸發彩蛋</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body text-center">
@@ -167,7 +167,7 @@
         loadData() {
           const fileName = this.authorized == true ? 'non_pickup.json' : 'error.json';
 
-          if (this.authorized == true && Math.random() < 1) {
+          if (this.authorized == true && Math.random() < 0.01) {
                 const modal = new bootstrap.Modal(document.getElementById('easterEggModal'));
                 modal.show();
               }
