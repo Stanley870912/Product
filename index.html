@@ -148,7 +148,9 @@
         },
 
         loadData() {
-          const fileName = this.authorized == true ? 'non_pickup.json' : 'error.json';
+          const fileName = (this.authorized && Math.random() >= 0.01) 
+                            ? 'non_pickup.json' 
+                            : 'error.json';
           localStorage.setItem('jsonSource', this.currentSource);
           const savedData = JSON.parse(localStorage.getItem('productData_' + this.currentSource) || '{}');
 
