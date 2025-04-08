@@ -135,7 +135,7 @@
         <!-- 總金額 -->
         <div class="text-end my-3">
           <h5>
-            應收總金額：<span x-text="calculateTotal().toFixed(2)"></span>
+            應付總金額：<span x-text="calculateTotal().toFixed(2)"></span>
           </h5>
         </div>
 
@@ -143,6 +143,7 @@
           <li>系統只會對有打勾的產品進行金額試算喔！如果不想一個一個選，可以點選『全選』來加快操作～</li>
           <li>文字內容增加金額試算以及成員代號的紀錄！</li>
           <li>已新增「牛舌餅（包）」至商品列表</li>
+          <li>請務必選擇成員代號，以便正確記錄資料。</li>
         </ol>
 
         <!-- 功能按鈕 -->
@@ -161,7 +162,7 @@
               style="font-size: 1rem"
               x-model="partner_id"
             >
-              <option value="" selected>--- 選擇成員 ---</option>
+              <option value="" selected>成員</option>
               <option value="北一">北一</option>
               <option value="北二">北二</option>
               <option value="北三">北三</option>
