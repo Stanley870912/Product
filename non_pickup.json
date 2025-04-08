@@ -8,6 +8,7 @@
   { "product_group": 1, "product_name": "芝麻鳳梨餅(塊)", "price": 78 },
   { "product_group": 1, "product_name": "咖哩肉餅(包)", "price": 78 },
   { "product_group": 1, "product_name": "牛舌餅(箱)", "price": 975 },
+  { "product_group": 1, "product_name": "牛舌餅(包)", "price": 65 },
   { "product_group": 1, "product_name": "鹹甜梅糕(箱)", "price": 2210 },
   { "product_group": 2, "product_name": "老婆餅(甜)(包)", "price": 11 },
   {
