@@ -13,7 +13,6 @@
   <template x-if="authorized">
     <div class="container my-5">
       <h2 class="text-center">產品清單</h2>
-
       <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
           <span x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"></span>
@@ -92,6 +91,20 @@
 
       <!-- 功能按鈕 -->
       <div class="mt-4 d-flex gap-2 flex-wrap">
+        <select class="text-center" style="font-size:1rem" x-model="partner_id">
+          <option value=""  selected>--- 選擇成員 ---</option>
+          <option value="北一" selected>北一</option>
+          <option value="北二" selected>北二</option>
+          <option value="北三" selected>北三</option>
+          <option value="北四" selected>北四</option>
+          <option value="北五" selected>北五</option>
+          <option value="南一" selected>南一</option>
+          <option value="南二" selected>南二</option>
+          <option value="南三" selected>南三</option>
+          <option value="南四" selected>南四</option>
+          <option value="阿邦" selected>阿邦</option>
+          <option value="小妹" selected>小妹</option>
+      </select>
         <button class="btn btn-primary" @click="generateText()">生成文字並複製(會直接複製喔!)</button>
         <button class="btn btn-outline-primary" @click="toggleSelectAll()">
           <span x-text="isAllChecked() ? '取消全選' : '全選'"></span>
@@ -140,6 +153,7 @@
         items: [],
         showOnlyWithCount: false,
         authorized: false,
+        partner_id: "",
 
         authCheck() {
           const lastLoginTime = localStorage.getItem('lastLoginTime');
@@ -150,7 +164,7 @@
             this.loadData();
           } else {
             const password = prompt("請輸入密碼才能進入：");
-            if (password === "1234") {
+            if (password == 1234) {
               localStorage.setItem('lastLoginTime', now);
               this.authorized = true;
               this.loadData();
@@ -173,7 +187,7 @@
               }
           localStorage.setItem('jsonSource', this.currentSource);
           const savedData = JSON.parse(localStorage.getItem('productData_' + this.currentSource) || '{}');
-
+          this.partner_id = localStorage.getItem('partner_id') || "";
           fetch(fileName)
             .then(response => response.json())
             .then(data => {
@@ -231,7 +245,13 @@
         },
 
         generateText() {
-          let text = '日期: ' + new Date().toLocaleDateString() + ';\n\n';
+          if (this.partner_id === "") {
+            alert("請選擇成員！");
+            return;
+          }else{
+            localStorage.setItem('partner_id', this.partner_id);
+          }
+          let text = '日期: ' + new Date().toLocaleDateString() + ';\n\n'+'成員: ' + this.partner_id + ';\n\n';
           let lastGroup = null;
 
           this.items.forEach(item => {
