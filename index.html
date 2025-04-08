@@ -26,7 +26,7 @@
             @click="showOnlyWithCount = !showOnlyWithCount"
           >
             <span
-              x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"
+              x-text="showOnlyWithCount ? '全部商品' : '有數量的商品'"
             ></span>
           </button>
           <button class="btn btn-danger" @click="resetAll()">重置</button>
@@ -139,47 +139,65 @@
           </h5>
         </div>
 
-        <span class="text-danger m-2"> 1.系統只會對有打勾的產品進行金額試算喔！如果不想一個一個選，可以點選『全選』來加快操作～ </span>
-        <br>
-        <span class="text-danger m-2"> 2.文字內容增加 金額試算 以及 成員代號 的紀錄！ </span>
-        <br>
-        <span class="text-danger m-2"> 3.已新增「牛舌餅（包）」至商品列表 </span>
+        <ol class="text-danger m-2">
+          <li>系統只會對有打勾的產品進行金額試算喔！如果不想一個一個選，可以點選『全選』來加快操作～</li>
+          <li>文字內容增加金額試算以及成員代號的紀錄！</li>
+          <li>已新增「牛舌餅（包）」至商品列表</li>
+        </ol>
 
         <!-- 功能按鈕 -->
-        <div class="mt-4 d-flex gap-2 flex-wrap">
-          <select
-            class="text-center"
-            style="font-size: 1rem"
-            x-model="partner_id"
-          >
-            <option value="" selected>--- 選擇成員 ---</option>
-            <option value="北一" selected>北一</option>
-            <option value="北二" selected>北二</option>
-            <option value="北三" selected>北三</option>
-            <option value="北四" selected>北四</option>
-            <option value="北五" selected>北五</option>
-            <option value="南一" selected>南一</option>
-            <option value="南二" selected>南二</option>
-            <option value="南三" selected>南三</option>
-            <option value="南四" selected>南四</option>
-            <option value="阿邦" selected>阿邦</option>
-            <option value="小妹" selected>小妹</option>
-          </select>
-          <button class="btn btn-primary" @click="generateText()">
-            生成文字並複製(會直接複製喔!)
-          </button>
-          <button class="btn btn-outline-primary" @click="toggleSelectAll()">
-            <span x-text="isAllChecked() ? '取消全選' : '全選'"></span>
-          </button>
-          <button
-            class="btn btn-secondary"
-            @click="showOnlyWithCount = !showOnlyWithCount"
-          >
-            <span
-              x-text="showOnlyWithCount ? '顯示全部商品' : '只顯示有數量的商品'"
-            ></span>
-          </button>
+        <div class="mt-4 row g-2">
+          <!-- 第一列：生成文字按鈕 -->
+          <div class="col-12">
+            <button class="btn btn-primary w-100" @click="generateText()">
+              生成文字並複製(會直接複製喔!)
+            </button>
+          </div>
+        
+          <!-- 第二列：下拉選單 -->
+          <div class="col-3">
+            <select
+              class="form-select text-center"
+              style="font-size: 1rem"
+              x-model="partner_id"
+            >
+              <option value="" selected>--- 選擇成員 ---</option>
+              <option value="北一">北一</option>
+              <option value="北二">北二</option>
+              <option value="北三">北三</option>
+              <option value="北四">北四</option>
+              <option value="北五">北五</option>
+              <option value="南一">南一</option>
+              <option value="南二">南二</option>
+              <option value="南三">南三</option>
+              <option value="南四">南四</option>
+              <option value="阿邦">阿邦</option>
+              <option value="小妹">小妹</option>
+            </select>
+          </div>
+        
+          <!-- 第二列：全選按鈕 -->
+          <div class="col-4">
+            <button class="btn btn-outline-primary w-100" @click="toggleSelectAll()">
+              <span x-text="isAllChecked() ? '取消全選' : '全選'"></span>
+            </button>
+          </div>
+        
+          <!-- 第二列：顯示過濾 -->
+          <div class="col-5">
+            <button
+              class="btn btn-secondary w-100"
+              @click="showOnlyWithCount = !showOnlyWithCount"
+            >
+              <span
+                x-text="showOnlyWithCount ? '全部商品' : '有數量的商品'"
+              ></span>
+            </button>
+          </div>
         </div>
+        
+        
+        
 
         <textarea
           x-ref="outputText"
