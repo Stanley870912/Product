@@ -65,7 +65,7 @@
         </thead>
         <tbody>
           <template x-for="item in group9Items()" :key="item.product_name">
-            <tr class="text-center" x-show="!showOnlyWithCount || item.count > 0">
+            <tr class="text-center" x-show="!showOnlyWithCount || item.count != 0">
               <td><input type="checkbox" x-model="item.checked" @change="saveToLocalStorage()"></td>
               <td x-text="item.product_name"></td>
               <td x-text="item.price"></td>
@@ -251,7 +251,7 @@
           }else{
             localStorage.setItem('partner_id', this.partner_id);
           }
-          let text = '日期: ' + new Date().toLocaleDateString() + ';\n\n'+'成員: ' + this.partner_id + ';\n\n';
+          let text = '日期: ' + new Date().toLocaleDateString() + ';\n'+'成員: ' + this.partner_id + ';\n\n';
           let lastGroup = null;
 
           this.items.forEach(item => {
@@ -264,6 +264,8 @@
               text += `${item.product_name}:${item.count};\n`;
             }
           });
+
+          text += '\n\n餅類:'+this.calculateOtherGroupsTotal().toFixed(2)+'元;\n' +'糖果類:'+this.calculateGroup9Total().toFixed(2) +'元;\n' + '總金額: ' + this.calculateTotal().toFixed(2) + '元;';
 
           this.$refs.outputText.value = text;
           this.copyToClipboard();
