@@ -341,9 +341,9 @@
           const ok = confirm("確定這是最終訂單嗎？");
           if (ok) {
             this.sendToGmail(text);
-            this.merge(JSON.parse(
+            this.merge(
               localStorage.getItem("productData") || "{}"
-            ));
+            );
           }
 
         },
