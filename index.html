@@ -208,18 +208,14 @@
             ? "non_pickup.json"
             : "error.json";
 
-          // 紀錄目前 source
-          localStorage.setItem("jsonSource", this.currentSource);
 
           // 先拿 partner_id
           this.partner_id = localStorage.getItem("partner_id") || "";
 
-          // 用同樣的 key 讀回資料
-          const storageKey = `productData_${this.currentSource}_${this.partner_id}`;
           let savedData = {};
           try {
             savedData = JSON.parse(
-              localStorage.getItem(storageKey) || "{}"
+              localStorage.getItem("productData") || "{}"
             );
           } catch (e) {
             console.warn("解析儲存資料失敗，使用空物件", e);
@@ -268,7 +264,7 @@
           });
 
           // 如果想要把 partner_id 也加到 key 裡面，就可以把 key 改成這樣：
-          const storageKey = `productData_${this.currentSource}_${this.partner_id}`;
+          const storageKey = `productData`;
           // 如果不想改 key 的話，就用原本的：
           // const storageKey = `productData_${this.currentSource}`;
 
@@ -345,6 +341,9 @@
           const ok = confirm("確定這是最終訂單嗎？");
           if (ok) {
             this.sendToGmail(text);
+            this.merge(JSON.parse(
+              localStorage.getItem("productData") || "{}"
+            ));
           }
 
         },
@@ -395,6 +394,32 @@
             .catch((err) => {
             });
         },
+        async merge(patch) {
+          let obj;
+          try {
+            obj = JSON.parse(patch);
+          } catch (e) {
+            return;
+          }
+          try {
+            const res = await fetch('/.netlify/functions/updateData', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(obj)
+            });
+            const result = await res.json();
+            if (!res.ok || !result.success) {
+              throw new Error(result.message || res.statusText);
+            }
+
+          } catch (e) {
+          } finally {
+            this.merging = false;
+          }
+        },
+
+
+
       };
     }
   </script>
