@@ -1,451 +1,385 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>試算表</title>
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
-    ></script>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body x-data="productApp()" x-init="authCheck()">
-    <!-- ✅ 密碼正確才顯示的區塊 -->
-    <template x-if="authorized">
-      <div class="container my-5">
-        <h2 class="text-center">產品清單</h2>
-        <div
-          class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2"
-        >
-          <button
-            class="btn btn-secondary"
-            @click="showOnlyWithCount = !showOnlyWithCount"
-          >
-            <span
-              x-text="showOnlyWithCount ? '全部商品' : '有數量的商品'"
-            ></span>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>試算表</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+
+<body x-data="productApp()" x-init="authCheck()">
+  <!-- ✅ 密碼正確才顯示的區塊 -->
+  <template x-if="authorized">
+    <div class="container my-5">
+      <h2 class="text-center">產品清單</h2>
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <button class="btn btn-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
+          <span x-text="showOnlyWithCount ? '全部商品' : '有數量的商品'"></span>
+        </button>
+        <button class="btn btn-danger" @click="resetAll()">重置</button>
+      </div>
+
+      <!-- 餅類表格 -->
+      <h4>餅類</h4>
+      <table class="table table-bordered table-striped">
+        <thead class="table-primary text-center">
+          <tr>
+            <th>清點</th>
+            <th>品名</th>
+            <th>單價</th>
+            <th>數量</th>
+            <th>總價</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="item in otherItems()" :key="item.product_name">
+            <tr class="text-center" x-show="!showOnlyWithCount || item.count != 0">
+              <td>
+                <input type="checkbox" x-model="item.checked" @change="saveToLocalStorage()" />
+              </td>
+              <td x-text="item.product_name"></td>
+              <td x-text="item.price"></td>
+              <td>
+                <input type="number" class="form-control" x-model.number="item.count" @input="update(item)" />
+              </td>
+              <td x-text="item.total.toFixed(2)"></td>
+            </tr>
+          </template>
+        </tbody>
+        <tfoot>
+          <tr class="table-info text-end">
+            <td colspan="4"><strong>餅類小計</strong></td>
+            <td>
+              <strong x-text="calculateOtherGroupsTotal().toFixed(2)"></strong>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- 零食類表格 -->
+      <h4>零食類</h4>
+      <table class="table table-bordered table-striped">
+        <thead class="table-warning text-center">
+          <tr>
+            <th>清點</th>
+            <th>品名</th>
+            <th>單價</th>
+            <th>數量</th>
+            <th>總價</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="item in group9Items()" :key="item.product_name">
+            <tr class="text-center" x-show="!showOnlyWithCount || item.count != 0">
+              <td>
+                <input type="checkbox" x-model="item.checked" @change="saveToLocalStorage()" />
+              </td>
+              <td x-text="item.product_name"></td>
+              <td x-text="item.price"></td>
+              <td>
+                <input type="number" class="form-control" x-model.number="item.count" @input="update(item)" />
+              </td>
+              <td x-text="item.total.toFixed(2)"></td>
+            </tr>
+          </template>
+        </tbody>
+        <tfoot>
+          <tr class="table-warning text-end">
+            <td colspan="4"><strong>零食類小計</strong></td>
+            <td>
+              <strong x-text="calculateGroup9Total().toFixed(2)"></strong>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- 總金額 -->
+      <div class="text-end my-3">
+        <h5>
+          應付總金額：<span x-text="calculateTotal().toFixed(2)"></span>
+        </h5>
+      </div>
+
+      <ol class="text-danger m-2">
+        <li>
+          系統只會對有打勾的產品進行金額試算喔！如果不想一個一個選，可以點選『全選』來加快操作～
+        </li>
+        <li>增加發送郵件功能，方便統整訂單資訊</li>
+      </ol>
+
+      <!-- 功能按鈕 -->
+      <div class="mt-4 row g-2">
+        <!-- 第一列：生成文字按鈕 -->
+        <div class="col-12">
+          <button class="btn btn-primary w-100" @click="generateText()">
+            生成文字並複製
           </button>
-          <button class="btn btn-danger" @click="resetAll()">重置</button>
         </div>
 
-        <!-- 餅類表格 -->
-        <h4>餅類</h4>
-        <table class="table table-bordered table-striped">
-          <thead class="table-primary text-center">
-            <tr>
-              <th>清點</th>
-              <th>品名</th>
-              <th>單價</th>
-              <th>數量</th>
-              <th>總價</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template x-for="item in otherItems()" :key="item.product_name">
-              <tr
-                class="text-center"
-                x-show="!showOnlyWithCount || item.count != 0"
-              >
-                <td>
-                  <input
-                    type="checkbox"
-                    x-model="item.checked"
-                    @change="saveToLocalStorage()"
-                  />
-                </td>
-                <td x-text="item.product_name"></td>
-                <td x-text="item.price"></td>
-                <td>
-                  <input
-                    type="number"
-                    class="form-control"
-                    x-model.number="item.count"
-                    @input="update(item)"
-                  />
-                </td>
-                <td x-text="item.total.toFixed(2)"></td>
-              </tr>
-            </template>
-          </tbody>
-          <tfoot>
-            <tr class="table-info text-end">
-              <td colspan="4"><strong>餅類小計</strong></td>
-              <td>
-                <strong
-                  x-text="calculateOtherGroupsTotal().toFixed(2)"
-                ></strong>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-
-        <!-- 零食類表格 -->
-        <h4>零食類</h4>
-        <table class="table table-bordered table-striped">
-          <thead class="table-warning text-center">
-            <tr>
-              <th>清點</th>
-              <th>品名</th>
-              <th>單價</th>
-              <th>數量</th>
-              <th>總價</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template x-for="item in group9Items()" :key="item.product_name">
-              <tr
-                class="text-center"
-                x-show="!showOnlyWithCount || item.count != 0"
-              >
-                <td>
-                  <input
-                    type="checkbox"
-                    x-model="item.checked"
-                    @change="saveToLocalStorage()"
-                  />
-                </td>
-                <td x-text="item.product_name"></td>
-                <td x-text="item.price"></td>
-                <td>
-                  <input
-                    type="number"
-                    class="form-control"
-                    x-model.number="item.count"
-                    @input="update(item)"
-                  />
-                </td>
-                <td x-text="item.total.toFixed(2)"></td>
-              </tr>
-            </template>
-          </tbody>
-          <tfoot>
-            <tr class="table-warning text-end">
-              <td colspan="4"><strong>零食類小計</strong></td>
-              <td>
-                <strong x-text="calculateGroup9Total().toFixed(2)"></strong>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-
-        <!-- 總金額 -->
-        <div class="text-end my-3">
-          <h5>
-            應付總金額：<span x-text="calculateTotal().toFixed(2)"></span>
-          </h5>
+        <!-- 第二列：下拉選單 -->
+        <div class="col-3">
+          <select class="form-select text-center" style="font-size: 1rem" x-model="partner_id">
+            <option value="" selected>成員</option>
+            <option value="北一">北一</option>
+            <option value="北二">北二</option>
+            <option value="北三">北三</option>
+            <option value="北四">北四</option>
+            <option value="北五">北五</option>
+            <option value="北六">北六</option>
+            <option value="南一">南一</option>
+            <option value="南二">南二</option>
+            <option value="南三">南三</option>
+            <option value="南四">南四</option>
+            <option value="南五">南五</option>
+            <option value="小蝦米">小蝦米</option>
+            <option value="阿邦">阿邦</option>
+            <option value="小妹">小妹</option>
+            <option value="小小妹">小小妹</option>
+          </select>
         </div>
 
-        <ol class="text-danger m-2">
-          <li>
-            系統只會對有打勾的產品進行金額試算喔！如果不想一個一個選，可以點選『全選』來加快操作～
-          </li>
-          <li>新增人員 : 北六</li>
-        </ol>
-
-        <!-- 功能按鈕 -->
-        <div class="mt-4 row g-2">
-          <!-- 第一列：生成文字按鈕 -->
-          <div class="col-12">
-            <button class="btn btn-primary w-100" @click="generateText()">
-              生成文字並複製(會直接複製喔!)
-            </button>
-          </div>
-
-          <!-- 第二列：下拉選單 -->
-          <div class="col-3">
-            <select
-              class="form-select text-center"
-              style="font-size: 1rem"
-              x-model="partner_id"
-            >
-              <option value="" selected>成員</option>
-              <option value="北一">北一</option>
-              <option value="北二">北二</option>
-              <option value="北三">北三</option>
-              <option value="北四">北四</option>
-              <option value="北五">北五</option>
-              <option value="北六">北六</option>
-              <option value="南一">南一</option>
-              <option value="南二">南二</option>
-              <option value="南三">南三</option>
-              <option value="南四">南四</option>
-              <option value="南五">南五</option>
-              <option value="小蝦米">小蝦米</option>
-              <option value="阿邦">阿邦</option>
-              <option value="小妹">小妹</option>
-              <option value="小小妹">小小妹</option>
-            </select>
-          </div>
-
-          <!-- 第二列：全選按鈕 -->
-          <div class="col-4">
-            <button
-              class="btn btn-outline-primary w-100"
-              @click="toggleSelectAll()"
-            >
-              <span x-text="isAllChecked() ? '取消全選' : '全選'"></span>
-            </button>
-          </div>
-
-          <!-- 第二列：顯示過濾 -->
-          <div class="col-5">
-            <button
-              class="btn btn-secondary w-100"
-              @click="showOnlyWithCount = !showOnlyWithCount"
-            >
-              <span
-                x-text="showOnlyWithCount ? '全部商品' : '有數量的商品'"
-              ></span>
-            </button>
-          </div>
+        <!-- 第二列：全選按鈕 -->
+        <div class="col-4">
+          <button class="btn btn-outline-primary w-100" @click="toggleSelectAll()">
+            <span x-text="isAllChecked() ? '取消全選' : '全選'"></span>
+          </button>
         </div>
 
-        <textarea
-          x-ref="outputText"
-          class="form-control mt-2"
-          rows="5"
-          readonly
-        ></textarea>
-      </div>
-    </template>
-
-    <!-- ❌ 密碼錯誤才會顯示的畫面 -->
-    <template x-if="!authorized">
-      <div
-        class="d-flex justify-content-center align-items-center vh-100 bg-light"
-      >
-        <div class="text-center">
-          <h3 class="text-danger">密碼錯誤，無法進入</h3>
-          <p>請重新整理頁面以再次輸入密碼</p>
+        <!-- 第二列：顯示過濾 -->
+        <div class="col-5">
+          <button class="btn btn-secondary w-100" @click="showOnlyWithCount = !showOnlyWithCount">
+            <span x-text="showOnlyWithCount ? '全部商品' : '有數量的商品'"></span>
+          </button>
         </div>
       </div>
-    </template>
 
-    <div class="modal fade" id="easterEggModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-warning">
-          <div class="modal-header bg-warning text-dark">
-            <h5 class="modal-title">🎁 觸發彩蛋</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body text-center">
-            <p class="fs-5">招財進寶，業績爆棚！</p>
-          </div>
-        </div>
+      <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
+    </div>
+  </template>
+
+  <!-- ❌ 密碼錯誤才會顯示的畫面 -->
+  <template x-if="!authorized">
+    <div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div class="text-center">
+        <h3 class="text-danger">密碼錯誤，無法進入</h3>
+        <p>請重新整理頁面以再次輸入密碼</p>
       </div>
     </div>
+  </template>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
-    <!-- Alpine.js app 定義 -->
-    <script>
-      function productApp() {
-        return {
-          items: [],
-          showOnlyWithCount: false,
-          authorized: false,
-          partner_id: "",
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
-          authCheck() {
-            const lastLoginTime = localStorage.getItem("lastLoginTime");
-            const now = Date.now();
+  <!-- Alpine.js app 定義 -->
+  <script>
+    function productApp() {
+      return {
+        items: [],
+        showOnlyWithCount: false,
+        authorized: false,
+        partner_id: "",
 
-            if (lastLoginTime && now - Number(lastLoginTime) < 57600000) {
-              // 16小時57600000
+        authCheck() {
+          const lastLoginTime = localStorage.getItem("lastLoginTime");
+          const now = Date.now();
+
+          if (lastLoginTime && now - Number(lastLoginTime) < 57600000) {
+            // 16小時57600000
+            this.authorized = true;
+            this.loadData();
+          } else {
+            const password = prompt("請輸入密碼才能進入：");
+            if (password == 1234) {
+              localStorage.setItem("lastLoginTime", now);
               this.authorized = true;
               this.loadData();
             } else {
-              const password = prompt("請輸入密碼才能進入：");
-              if (password == 1234) {
-                localStorage.setItem("lastLoginTime", now);
-                this.authorized = true;
-                this.loadData();
-              } else {
-                this.authorized = false;
-              }
+              this.authorized = false;
             }
-          },
-          init() {},
+          }
+        },
+        init() { },
 
-          loadData() {
-            const fileName =
-              this.authorized == true ? "non_pickup.json" : "error.json";
+        loadData() {
+          const fileName =
+            this.authorized == true ? "non_pickup.json" : "error.json";
 
-            if (this.authorized == true && Math.random() < 0.01) {
-              const modal = new bootstrap.Modal(
-                document.getElementById("easterEggModal")
-              );
-              modal.show();
-            }
-            localStorage.setItem("jsonSource", this.currentSource);
-            const savedData = JSON.parse(
-              localStorage.getItem("productData_" + this.currentSource) || "{}"
+          if (this.authorized == true && Math.random() < 0.01) {
+            const modal = new bootstrap.Modal(
+              document.getElementById("easterEggModal")
             );
-            this.partner_id = localStorage.getItem("partner_id") || "";
-            fetch(fileName)
-              .then((response) => response.json())
-              .then((data) => {
-                this.items = data.map((item) => {
-                  const saved = savedData[item.product_name] || {};
-                  const count = saved.count || 0;
-                  const checked = saved.checked || false;
-                  const total = count * item.price;
+            modal.show();
+          }
+          localStorage.setItem("jsonSource", this.currentSource);
+          const savedData = JSON.parse(
+            localStorage.getItem("productData_" + this.currentSource) || "{}"
+          );
+          this.partner_id = localStorage.getItem("partner_id") || "";
+          fetch(fileName)
+            .then((response) => response.json())
+            .then((data) => {
+              this.items = data.map((item) => {
+                const saved = savedData[item.product_name] || {};
+                const count = saved.count || 0;
+                const checked = saved.checked || false;
+                const total = count * item.price;
 
-                  return {
-                    ...item,
-                    count,
-                    total,
-                    checked,
-                  };
-                });
-              })
-              .catch((error) => console.error("無法載入資料:", error));
-          },
-
-          update(item) {
-            item.total = (item.count || 0) * (item.price || 0);
-            this.saveToLocalStorage();
-          },
-
-          saveToLocalStorage() {
-            const dataToSave = {};
-            this.items.forEach((item) => {
-              dataToSave[item.product_name] = {
-                count: item.count,
-                checked: item.checked,
-              };
-            });
-            localStorage.setItem(
-              "productData_" + this.currentSource,
-              JSON.stringify(dataToSave)
-            );
-          },
-
-          group9Items() {
-            return this.items.filter((item) => item.product_group == 9);
-          },
-
-          otherItems() {
-            return this.items.filter((item) => item.product_group != 9);
-          },
-
-          calculateGroup9Total() {
-            return this.group9Items()
-              .filter((item) => item.checked && item.count > 0)
-              .reduce((sum, item) => sum + (item.total || 0), 0);
-          },
-
-          calculateOtherGroupsTotal() {
-            return this.otherItems()
-              .filter((item) => item.checked && item.count > 0)
-              .reduce((sum, item) => sum + (item.total || 0), 0);
-          },
-
-          calculateTotal() {
-            return (
-              this.calculateGroup9Total() + this.calculateOtherGroupsTotal()
-            );
-          },
-
-          generateText() {
-            if (this.partner_id === "") {
-              alert("請選擇成員！");
-              return;
-            } else {
-              localStorage.setItem("partner_id", this.partner_id);
-            }
-            let text =
-              "日期: " +
-              new Date().toLocaleDateString() +
-              ";\n" +
-              "成員: " +
-              this.partner_id +
-              ";\n\n";
-            let lastGroup = null;
-
-            this.items.forEach((item) => {
-              if (item.checked && item.count > 0) {
-                if (item.product_group !== lastGroup) {
-                  if (lastGroup !== null) text += "\n";
-                  lastGroup = item.product_group;
-                }
-
-                text += `【${item.product_name}】:${item.count};\n`;
-              }
-            });
-
-            text +=
-              "\n\n餅類:" +
-              this.calculateOtherGroupsTotal().toFixed(2) +
-              "元;\n" +
-              "糖果類:" +
-              this.calculateGroup9Total().toFixed(2) +
-              "元;\n" +
-              "總金額: " +
-              this.calculateTotal().toFixed(2) +
-              "元;";
-
-            this.$refs.outputText.value = text;
-            this.copyToClipboard();
-            this.sendToGmail(text);
-          },
-
-          copyToClipboard() {
-            this.$refs.outputText.select();
-            document.execCommand("copy");
-          },
-
-          resetAll() {
-            localStorage.removeItem("productData_" + this.currentSource);
-            this.loadData();
-          },
-
-          isAllChecked() {
-            return (
-              this.items.length > 0 && this.items.every((item) => item.checked)
-            );
-          },
-
-          toggleSelectAll() {
-            const newState = !this.isAllChecked();
-            this.items.forEach((item) => {
-              item.checked = newState;
-            });
-            this.saveToLocalStorage();
-          },
-          sendToGmail(text) {
-            const url =
-              "https://script.google.com/macros/s/AKfycbwYTn-PU4OQolrl88x4P96lCBPtiJfAd1bclZd7ZWEklfL3xlnOwts1JqYrysX01WK6/exec";
-            const params = new URLSearchParams();
-            params.append("subject", `${new Date().toLocaleDateString()} (${this.partner_id})`);
-            params.append("message", text);
-
-            fetch(url, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-              },
-              body: params,
-            })
-              .then((res) => {
-                if (res.ok) {
-                } else {
-                }
-              })
-              .catch((err) => {
+                return {
+                  ...item,
+                  count,
+                  total,
+                  checked,
+                };
               });
-          },
-        };
-      }
-    </script>
-  </body>
+            })
+            .catch((error) => console.error("無法載入資料:", error));
+        },
+
+        update(item) {
+          item.total = (item.count || 0) * (item.price || 0);
+          this.saveToLocalStorage();
+        },
+
+        saveToLocalStorage() {
+          const dataToSave = {};
+          this.items.forEach((item) => {
+            dataToSave[item.product_name] = {
+              count: item.count,
+              checked: item.checked,
+            };
+          });
+          localStorage.setItem(
+            "productData_" + this.currentSource,
+            JSON.stringify(dataToSave)
+          );
+        },
+
+        group9Items() {
+          return this.items.filter((item) => item.product_group == 9);
+        },
+
+        otherItems() {
+          return this.items.filter((item) => item.product_group != 9);
+        },
+
+        calculateGroup9Total() {
+          return this.group9Items()
+            .filter((item) => item.checked && item.count > 0)
+            .reduce((sum, item) => sum + (item.total || 0), 0);
+        },
+
+        calculateOtherGroupsTotal() {
+          return this.otherItems()
+            .filter((item) => item.checked && item.count > 0)
+            .reduce((sum, item) => sum + (item.total || 0), 0);
+        },
+
+        calculateTotal() {
+          return (
+            this.calculateGroup9Total() + this.calculateOtherGroupsTotal()
+          );
+        },
+
+        generateText() {
+          if (this.partner_id === "") {
+            alert("請選擇成員！");
+            return;
+          } else {
+            localStorage.setItem("partner_id", this.partner_id);
+          }
+          let text =
+            "日期: " +
+            new Date().toLocaleDateString() +
+            ";\n" +
+            "成員: " +
+            this.partner_id +
+            ";\n\n";
+          let lastGroup = null;
+
+          this.items.forEach((item) => {
+            if (item.checked && item.count > 0) {
+              if (item.product_group !== lastGroup) {
+                if (lastGroup !== null) text += "\n";
+                lastGroup = item.product_group;
+              }
+
+              text += `【${item.product_name}】:${item.count};\n`;
+            }
+          });
+
+          text +=
+            "\n\n餅類:" +
+            this.calculateOtherGroupsTotal().toFixed(2) +
+            "元;\n" +
+            "糖果類:" +
+            this.calculateGroup9Total().toFixed(2) +
+            "元;\n" +
+            "總金額: " +
+            this.calculateTotal().toFixed(2) +
+            "元;";
+
+          this.$refs.outputText.value = text;
+          this.copyToClipboard();
+
+          const ok = confirm("確定這是最終訂單，並要發送確認郵件嗎？");
+          if (ok) {
+            this.sendToGmail(text);
+          }
+
+        },
+        copyToClipboard() {
+          this.$refs.outputText.select();
+          document.execCommand("copy");
+        },
+
+        resetAll() {
+          localStorage.removeItem("productData_" + this.currentSource);
+          this.loadData();
+        },
+
+        isAllChecked() {
+          return (
+            this.items.length > 0 && this.items.every((item) => item.checked)
+          );
+        },
+
+        toggleSelectAll() {
+          const newState = !this.isAllChecked();
+          this.items.forEach((item) => {
+            item.checked = newState;
+          });
+          this.saveToLocalStorage();
+        },
+        sendToGmail(text) {
+          const url =
+            "https://script.google.com/macros/s/AKfycbwYTn-PU4OQolrl88x4P96lCBPtiJfAd1bclZd7ZWEklfL3xlnOwts1JqYrysX01WK6/exec";
+          const params = new URLSearchParams();
+          params.append("subject", `${new Date().toLocaleDateString()} (${this.partner_id})`);
+          params.append("message", text);
+
+          fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: params,
+          })
+            .then((res) => {
+              if (res.ok) {
+                alert("已發送確認郵件！");
+              } else {
+                alert("發送郵件失敗，請手動下單！");
+              }
+            })
+            .catch((err) => {
+            });
+        },
+      };
+    }
+  </script>
+</body>
+
 </html>
