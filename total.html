@@ -107,35 +107,33 @@
             return {
                 items: [],
                 showOnlyWithCount: false,
+                partnerId:"北二",
+                selectedDate:"2025/5/16",
 
                 async loadData() {
                     try {
-                        // 1. 同時拿到產品 metadata 跟 orders JSON
                         const [prodRes, orderRes] = await Promise.all([
-                            fetch('non_pickup.json'),                             // 或 non_pickup.json（含 price, product_group, product_name）
-                            fetch('/.netlify/functions/getData')               // 回傳 { orders: [ … ] }
+                            fetch('non_pickup.json'),
+                            fetch('/.netlify/functions/getData')
                         ]);
                         if (!prodRes.ok) throw new Error('讀取產品清單失敗');
                         if (!orderRes.ok) throw new Error('讀取訂單資料失敗');
 
-                        const products = await prodRes.json();               // Array<{product_group,product_name,price}>
-                        const { orders } = await orderRes.json();           // { orders: Array<…> }
+                        const products = await prodRes.json();
+                        const { orders } = await orderRes.json();
 
-                        // 2. 選擇要顯示哪一筆訂單：這裡拿最後一筆
-                        const currentOrder = orders[orders.length - 1] || { items: {} };
+                        // 篩選出使用者選定的 partnerId/date
+                        const currentOrder = orders.find(o =>
+                            o.partnerId === this.partnerId && o.date === this.selectedDate
+                        ) || { items: {} };
 
-                        // 3. 用 metadata map 出要顯示的 items
+                        // map 全部產品
                         this.items = products.map(prod => {
                             const saved = currentOrder.items[prod.product_name] || {};
                             const count = saved.count || 0;
                             const checked = saved.checked || false;
                             const total = count * prod.price;
-                            return {
-                                ...prod,
-                                count,
-                                checked,
-                                total
-                            };
+                            return { ...prod, count, checked, total };
                         });
 
                     } catch (e) {
