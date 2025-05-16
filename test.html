@@ -25,7 +25,7 @@
         // 讀取 JSON
         async load() {
           try {
-            const res = await fetch('/functions/getData');
+            const res = await fetch('/.netlify/functions/getData');
             if (!res.ok) throw new Error(res.statusText);
             const data = await res.json();
             this.content = JSON.stringify(data, null, 2);
@@ -38,7 +38,7 @@
           try {
             // 驗證 JSON
             const parsed = JSON.parse(this.content);
-            const res = await fetch('/functions/updateData', {
+            const res = await fetch('/.netlify/functions/updateData', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(parsed)
