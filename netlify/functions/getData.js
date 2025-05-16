@@ -1,43 +1,29 @@
 // netlify/functions/getData.js
-const faunadb = require('faunadb');
-const q = faunadb.query;
-const client = new faunadb.Client({
-  secret: process.env.FAUNA_SECRET
-});
+const fetch = require('node-fetch');
+const TOKEN = process.env.GITHUB_TOKEN;
+const REPO  = process.env.GITHUB_REPO;
+const BRANCH= process.env.GITHUB_BRANCH;
 
 exports.handler = async () => {
   try {
-    let data;
-    try {
-      // 嘗試讀取 configs/data 這份文件
-      const resp = await client.query(
-        q.Get(q.Ref(q.Collection('configs'), 'data'))
-      );
-      data = resp.data;
-    } catch (err) {
-      // 如果是 404，表示文件不存在，就建立一份預設的
-      if (err.requestResult?.statusCode === 404) {
-        const createResp = await client.query(
-          q.Create(
-            q.Ref(q.Collection('configs'), 'data'),
-            { data: { items: [] } }
-          )
-        );
-        data = createResp.data;
-      } else {
-        throw err;
-      }
+    const url = `https://api.github.com/repos/${REPO}/contents/data.json?ref=${BRANCH}`;
+    const res = await fetch(url, {
+      headers: { Authorization: `token ${TOKEN}` }
+    });
+    if (!res.ok) {
+      return { statusCode: res.status, body: await res.text() };
     }
+    const { content, encoding } = await res.json();
+    const json = Buffer.from(content, encoding).toString();
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
+      body: json
     };
-  } catch (err) {
+  } catch (e) {
     return {
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: err.message })
+      body: JSON.stringify({ error: e.message })
     };
   }
 };

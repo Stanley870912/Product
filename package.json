@@ -16,8 +16,9 @@
     "url": "https://github.com/Stanley870912/Product/issues"
   },
   "homepage": "https://github.com/Stanley870912/Product#readme",
-  "description": "",
   "dependencies": {
-    "faunadb": "^4.8.2"
-  }
+    "faunadb": "^4.8.2",
+    "node-fetch": "^3.3.2"
+  },
+  "description": ""
 }
