@@ -108,7 +108,7 @@
                     try {
                         // 1. 同時拿到產品 metadata 跟 orders JSON
                         const [prodRes, orderRes] = await Promise.all([
-                            fetch('products.json'),                             // 或 non_pickup.json（含 price, product_group, product_name）
+                            fetch('non_pickup.json'),                             // 或 non_pickup.json（含 price, product_group, product_name）
                             fetch('/.netlify/functions/getData')               // 回傳 { orders: [ … ] }
                         ]);
                         if (!prodRes.ok) throw new Error('讀取產品清單失敗');
