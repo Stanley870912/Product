@@ -27,7 +27,7 @@
                 <!-- Partner 多選 -->
                 <template x-for="p in partnerOptions" :key="p">
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="partner" :id="`radio-${p}`" :value="p"
+                        <input class="form-check-input" type="checkbox" name="partner" :id="`radio-${p}`" :value="p"
                             x-model="selectedPartner" @change="loadData()" />
                         <label class="form-check-label" :for="`radio-${p}`" x-text="p"></label>
                     </div>
