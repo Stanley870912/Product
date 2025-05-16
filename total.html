@@ -28,7 +28,7 @@
                 <template x-for="p in partnerOptions" :key="p">
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="checkbox" name="partner" :id="`radio-${p}`" :value="p"
-                            x-model="selectedPartner" @change="loadData()" />
+                            x-model="selectedPartners" @change="loadData()" />
                         <label class="form-check-label" :for="`radio-${p}`" x-text="p"></label>
                     </div>
                 </template>
@@ -124,6 +124,7 @@
                 selectedPartners: [],     // 綁定多選結果
                 items: [],                // 試算清單
                 showOnlyWithCount: false,
+                
 
                 // 1. 產生日期下拉
                 init() {
