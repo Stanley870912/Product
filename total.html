@@ -183,6 +183,16 @@
     <div class="text-end mt-4">
       <h4>總計：<span x-text="calculateTotal().toFixed(2)"></span></h4>
     </div>
+
+    <!-- 生成文字 -->
+    <div class="text-center mt-4">
+      <button
+        class="btn btn-primary"
+        @click="generateText()"
+      >
+        生成文字
+    </button>
+    <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
   </div>
 
   <script>
@@ -276,7 +286,46 @@
         },
         calculateTotal() {
           return this.calculateGroup9Total() + this.calculateOtherGroupsTotal();
-        }
+        },
+        generateText() {
+            if(this.selectedPartners.length != 1) {
+              alert("請選擇成員");
+              return;
+            }
+          let text =
+            "日期: " +
+            new Date().toLocaleDateString() +
+            ";\n" +
+            "成員: " +
+            (this.selectedPartners[0] || "")  +
+            ";\n\n";
+          let lastGroup = null;
+
+          this.items.forEach((item) => {
+            if (item.checked && item.count > 0) {
+              if (item.product_group !== lastGroup) {
+                if (lastGroup !== null) text += "\n";
+                lastGroup = item.product_group;
+              }
+
+              text += `【${item.product_name}】:${item.count};\n`;
+            }
+          });
+
+          text +=
+            "\n\n餅類:" +
+            this.calculateOtherGroupsTotal().toFixed(2) +
+            "元;\n" +
+            "糖果類:" +
+            this.calculateGroup9Total().toFixed(2) +
+            "元;\n" +
+            "總金額: " +
+            this.calculateTotal().toFixed(2) +
+            "元;";
+
+          this.$refs.outputText.value = text;
+          this.copyToClipboard();
+        },
       };
     }
   </script>
