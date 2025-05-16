@@ -1,52 +1,102 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>編輯雲端 JSON</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>雲端 JSON 編輯器</title>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <style>
     body { font-family: sans-serif; padding: 2rem; }
-    textarea { width:100%; height:300px; font-family:monospace; font-size:14px; }
-    button { margin-top:0.5rem; padding:0.5rem 1rem; }
+    h1 { margin-bottom: 1rem; }
+    textarea { 
+      width: 100%; 
+      height: 300px; 
+      font-family: monospace; 
+      font-size: 14px; 
+      padding: 0.5rem; 
+      border: 1px solid #ccc; 
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn:disabled { background: #a5b4fc; cursor: not-allowed; }
+    .status { margin-top: 0.5rem; font-size: 0.9rem; }
   </style>
 </head>
 <body x-data="jsonEditor()" x-init="load()">
 
   <h1>雲端 JSON 編輯器</h1>
+
+  <!-- JSON 編輯 textarea -->
   <textarea x-model="content"></textarea>
-  <br>
-  <button @click="save()">雲端</button>
+
+  <!-- 按鈕區 -->
+  <div>
+    <button class="btn" :disabled="saving" @click="save()">
+      <template x-if="!saving">💾 存回雲端</template>
+      <template x-if="saving">⏳ 存檔中...</template>
+    </button>
+    <button class="btn" style="background:#6b7280" @click="load()">🔄 重新讀取</button>
+  </div>
+
+  <!-- 儲存狀態顯示 -->
+  <div class="status" x-text="statusMessage"></div>
 
   <script>
     function jsonEditor() {
       return {
-        content: '',
-        // 讀取 JSON
+        content: '',           // textarea 綁定的文字
+        saving: false,         // 存檔中狀態
+        statusMessage: '',     // 下方顯示讀取／存檔狀態
+
+        // 讀取雲端 JSON
         async load() {
+          this.statusMessage = '讀取中…';
           try {
             const res = await fetch('/.netlify/functions/getData');
             if (!res.ok) throw new Error(res.statusText);
             const data = await res.json();
             this.content = JSON.stringify(data, null, 2);
+            this.statusMessage = '✅ 讀取完成';
           } catch (e) {
-            alert('讀取失敗：' + e.message);
+            this.statusMessage = '❌ 讀取失敗：' + e.message;
           }
         },
-        // 寫回 JSON
+
+        // 把 textarea 的 JSON 存回雲端
         async save() {
+          let parsed;
           try {
-            // 驗證 JSON
-            const parsed = JSON.parse(this.content);
+            parsed = JSON.parse(this.content);
+          } catch (e) {
+            this.statusMessage = '❌ JSON 格式錯誤：' + e.message;
+            return;
+          }
+
+          this.saving = true;
+          this.statusMessage = '存檔中…';
+          try {
             const res = await fetch('/.netlify/functions/updateData', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(parsed)
             });
-            if (!res.ok) throw new Error((await res.json()).message || res.statusText);
-            alert('存檔成功！');
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || res.statusText);
+            this.statusMessage = '✅ 存檔成功';
           } catch (e) {
-            alert('存檔失敗：' + e.message);
+            this.statusMessage = '❌ 存檔失敗：' + e.message;
+          } finally {
+            this.saving = false;
           }
         }
       }
