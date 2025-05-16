@@ -18,9 +18,14 @@
             <button class="btn btn-outline-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
                 <span x-text="showOnlyWithCount ? '全部商品' : '只顯示有數量'"></span>
             </button>
-            <select id="">
+            <select x-model="selectedDate" @change="loadData()" class="form-select w-auto">
                 <option value="0" selected>日期</option>
-                <option value="1">2023-10-01</option>
+                <option value="2025/5/16">2025/5/16</option>
+            </select>
+            <select x-model="partner_id" @change="loadData()" class="form-select w-auto">
+                <option value="" selected>夥伴</option>
+                <option value="北一">北一</option>
+                <option value="北二">北二</option>
             </select>
         </div>
 
@@ -108,7 +113,7 @@
                 items: [],
                 showOnlyWithCount: false,
                 partnerId:"北二",
-                selectedDate:"2025/5/16",
+                selectedDate:"2025/5/15",
 
                 async loadData() {
                     try {
