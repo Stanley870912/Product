@@ -106,7 +106,7 @@
         <li>
           系統只會對有打勾的產品進行金額試算喔！如果不想一個一個選，可以點選『全選』來加快操作～
         </li>
-        <li>增加發送郵件功能，方便統整訂單資訊</li>
+        <li>增加發送最終訂單功能，方便統整訂單資訊</li>
       </ol>
 
       <!-- 功能按鈕 -->
@@ -324,7 +324,7 @@
           this.$refs.outputText.value = text;
           this.copyToClipboard();
 
-          const ok = confirm("確定這是最終訂單，並要發送確認郵件嗎？");
+          const ok = confirm("確定這是最終訂單嗎？");
           if (ok) {
             this.sendToGmail(text);
           }
