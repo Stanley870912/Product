@@ -3,39 +3,47 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>GitHub JSON Editor</title>
+  <title>GitHub JSON Merge 編輯器</title>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js" defer></script>
   <style>
-    body { font-family:sans-serif; padding:2rem; max-width:600px; margin:auto }
-    textarea { width:100%; height:200px; font-family:monospace; margin-bottom:1rem }
-    button { padding:.6rem 1.2rem; background:#007acc; color:#fff; border:none; border-radius:4px; cursor:pointer }
-    button:disabled { background:#8aa; }
-    .status { margin-top:.5rem; color:#555 }
+    body { font-family:sans-serif; padding:2rem; max-width:700px; margin:auto; }
+    pre, textarea { width:100%; box-sizing:border-box; font-family:monospace; }
+    pre { height:200px; overflow:auto; background:#f3f4f6; padding:1rem; border-radius:4px; }
+    textarea { height:100px; margin-bottom:1rem; padding:.5rem; border:1px solid #ccc; border-radius:4px; }
+    button { padding:.6rem 1.2rem; background:#10b981; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+    button:disabled { background:#6ee7b7; cursor:not-allowed; }
+    .status { margin-top:.5rem; font-size:.9rem; }
   </style>
 </head>
-<body x-data="editor()" x-init="load()">
+<body x-data="app()" x-init="load()">
 
-  <h1>GitHub JSON 編輯器</h1>
+  <h1>GitHub JSON Merge 編輯器</h1>
 
-  <textarea x-model="content"></textarea>
-  <br>
-  <button @click="save()" :disabled="saving">
-    <template x-if="!saving">💾 存回 GitHub</template>
-    <template x-if="saving">⏳ 存檔中…</template>
+  <h2>目前 content</h2>
+  <pre x-text="content"></pre>
+
+  <h2>合併 JSON 片段</h2>
+  <textarea x-model="patch" placeholder='範例：{"newKey":"newValue"}'></textarea>
+  <button @click="merge()" :disabled="merging">
+    <template x-if="!merging">🔀 合併並存回</template>
+    <template x-if="merging">⏳ 處理中…</template>
   </button>
+
   <div class="status" x-text="status"></div>
 
   <script>
-    function editor() {
+    function app() {
       return {
-        content: '',
-        saving: false,
-        status: '',
+        content: '',    // 當前 JSON (字串)
+        patch: '',      // 使用者輸入的新 JSON 片段
+        status: '',     // 操作狀態
+        merging: false,
 
         async load() {
           this.status = '讀取中…';
           try {
             const res = await fetch('/.netlify/functions/getData');
+            if (!res.ok) throw new Error(res.statusText);
             this.content = await res.text();
             this.status = '✅ 讀取完成';
           } catch (e) {
@@ -43,28 +51,34 @@
           }
         },
 
-        async save() {
-          let parsed;
+        async merge() {
+          let obj;
           try {
-            parsed = JSON.parse(this.content);
-          } catch {
-            this.status = '❌ JSON 格式錯誤';
+            obj = JSON.parse(this.patch);
+          } catch (e) {
+            this.status = '❌ JSON 片段格式錯誤';
             return;
           }
-          this.saving = true;
-          this.status = '存檔中…';
+          this.merging = true;
+          this.status = '合併中…';
           try {
             const res = await fetch('/.netlify/functions/updateData', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(parsed)
+              body: JSON.stringify(obj)
             });
-            if (!res.ok) throw new Error(await res.text());
-            this.status = '✅ 存檔成功';
+            const result = await res.json();
+            if (!res.ok || !result.success) {
+              throw new Error(result.message || res.statusText);
+            }
+            this.status = '✅ 合併並存回成功';
+            this.patch = '';
+            // 顯示最新合併後的 data
+            this.content = JSON.stringify(result.data, null, 2);
           } catch (e) {
-            this.status = '❌ 存檔失敗：' + e.message;
+            this.status = '❌ 合併失敗：' + e.message;
           } finally {
-            this.saving = false;
+            this.merging = false;
           }
         }
       }
