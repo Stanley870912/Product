@@ -127,7 +127,7 @@
           const today = new Date();
           this.dates = Array.from({length:7},(_,i)=>{
             const d = new Date(today);
-            d.setDate(today.getDate()+i);
+            d.setDate(today.getDate()-i);
             return d.toLocaleDateString('zh-Hant');
           });
           this.selectedDate = this.dates[0];
