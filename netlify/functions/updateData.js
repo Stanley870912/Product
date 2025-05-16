@@ -8,16 +8,16 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  // 解析前端傳來的新 JSON 片段
-  let patch;
+  // 解析前端傳來的新訂單物件
+  let newOrder;
   try {
-    patch = JSON.parse(event.body);
+    newOrder = JSON.parse(event.body);
   } catch (e) {
     return { statusCode: 400, body: 'Invalid JSON' };
   }
 
   try {
-    // 1. 先拿現有的 data.json metadata（含 sha）和內容
+    // 1. 拿 metadata + content
     const metaRes = await fetch(
       `https://api.github.com/repos/${REPO}/contents/data.json?ref=${BRANCH}`,
       { headers: { Authorization: `token ${TOKEN}` } }
@@ -28,10 +28,19 @@ exports.handler = async (event) => {
     const { sha, content, encoding } = await metaRes.json();
     const existing = JSON.parse(Buffer.from(content, encoding).toString());
 
-    // 2. 合併（淺拷貝）：newObj 覆蓋 existing 的屬性
-    const merged = { ...existing, ...patch };
+    // 2. 建立日期索引
+    // 假設 data.json 預設結構為 { orders: [] }
+    existing.orders = Array.isArray(existing.orders) ? existing.orders : [];
 
-    // 3. 提交回 GitHub
+    // 3. 過濾掉同日期 & 同 partnerId 的舊訂單
+    const filtered = existing.orders.filter(o =>
+      !(o.date === newOrder.date && o.partnerId === newOrder.partnerId)
+    );
+
+    // 4. 再 push 新訂單
+    filtered.push(newOrder);
+
+    // 5. 寫回 GitHub
     const putRes = await fetch(
       `https://api.github.com/repos/${REPO}/contents/data.json`,
       {
@@ -41,8 +50,10 @@ exports.handler = async (event) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          message: "Merge JSON via Netlify Function",
-          content: Buffer.from(JSON.stringify(merged, null, 2)).toString('base64'),
+          message: `Upsert order ${newOrder.partnerId} @ ${newOrder.date}`,
+          content: Buffer.from(
+            JSON.stringify({ ...existing, orders: filtered }, null, 2)
+          ).toString('base64'),
           sha,
           branch: BRANCH
         })
@@ -55,7 +66,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ success: true, data: merged })
+      body: JSON.stringify({ success: true, orders: filtered })
     };
   } catch (e) {
     return {

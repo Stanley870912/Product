@@ -208,14 +208,6 @@
             ? "non_pickup.json"
             : "error.json";
 
-          // 1% 機率跑彩蛋
-          if (this.authorized && Math.random() < 0.01) {
-            const modal = new bootstrap.Modal(
-              document.getElementById("easterEggModal")
-            );
-            modal.show();
-          }
-
           // 紀錄目前 source
           localStorage.setItem("jsonSource", this.currentSource);
 
@@ -263,6 +255,7 @@
           // 先把 partner_id 存下來
           const dataToSave = {
             partnerId: this.partner_id,
+            date:new Date().toLocaleDateString(),
             items: {}
           };
 
