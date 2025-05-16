@@ -6,57 +6,40 @@
   <title>雲端 JSON 編輯器</title>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <style>
-    body { font-family: sans-serif; padding: 2rem; }
+    body { font-family: sans-serif; padding: 2rem; max-width: 800px; margin: auto; }
     h1 { margin-bottom: 1rem; }
-    textarea { 
-      width: 100%; 
-      height: 300px; 
-      font-family: monospace; 
-      font-size: 14px; 
-      padding: 0.5rem; 
-      border: 1px solid #ccc; 
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-    .btn {
-      display: inline-block;
-      margin-top: 0.5rem;
-      padding: 0.6rem 1.2rem;
-      background: #4f46e5;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn:disabled { background: #a5b4fc; cursor: not-allowed; }
-    .status { margin-top: 0.5rem; font-size: 0.9rem; }
+    textarea { width:100%; height:200px; font-family:monospace; font-size:14px; padding:0.5rem; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; }
+    .btn { margin-top:0.5rem; padding:0.6rem 1.2rem; background:#4f46e5; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+    .btn:disabled { background:#a5b4fc; cursor:not-allowed; }
+    .status { margin-top:0.5rem; font-size:0.9rem; }
+    .input-row { display:flex; gap:0.5rem; margin-bottom:1rem; }
+    .input-row input { flex:1; padding:0.5rem; border:1px solid #ccc; border-radius:4px; }
   </style>
 </head>
 <body x-data="jsonEditor()" x-init="load()">
 
   <h1>雲端 JSON 編輯器</h1>
 
-  <!-- JSON 編輯 textarea -->
-  <textarea x-model="content"></textarea>
-
-  <!-- 按鈕區 -->
-  <div>
-    <button class="btn" :disabled="saving" @click="save()">
-      <template x-if="!saving">💾 存回雲端</template>
-      <template x-if="saving">⏳ 存檔中...</template>
-    </button>
-    <button class="btn" style="background:#6b7280" @click="load()">🔄 重新讀取</button>
+  <!-- 範例：讓使用者輸入一個 key/value，新物件會長這樣 { key: 'xxx', value: 'yyy' } -->
+  <div class="input-row">
+    <input type="text" placeholder="key" x-model="newKey">
+    <input type="text" placeholder="value" x-model="newValue">
+    <button class="btn" :disabled="adding" @click="addItem()">➕ 新增</button>
   </div>
 
-  <!-- 儲存狀態顯示 -->
+  <!-- 顯示原始 JSON -->
+  <textarea readonly x-text="content"></textarea>
+
+  <!-- 狀態訊息 -->
   <div class="status" x-text="statusMessage"></div>
 
   <script>
     function jsonEditor() {
       return {
-        content: '',           // textarea 綁定的文字
-        saving: false,         // 存檔中狀態
-        statusMessage: '',     // 下方顯示讀取／存檔狀態
+        content: '',             // 讀到的 JSON 字串
+        statusMessage: '',       // 顯示狀態
+        newKey: '', newValue: '',// 新增用欄位
+        adding: false,
 
         // 讀取雲端 JSON
         async load() {
@@ -72,31 +55,34 @@
           }
         },
 
-        // 把 textarea 的 JSON 存回雲端
-        async save() {
-          let parsed;
-          try {
-            parsed = JSON.parse(this.content);
-          } catch (e) {
-            this.statusMessage = '❌ JSON 格式錯誤：' + e.message;
+        // 新增一筆 { key, value }
+        async addItem() {
+          if (!this.newKey) {
+            this.statusMessage = '請輸入 key';
             return;
           }
+          const obj = { [this.newKey]: this.newValue };
 
-          this.saving = true;
-          this.statusMessage = '存檔中…';
+          this.adding = true;
+          this.statusMessage = '新增中…';
           try {
             const res = await fetch('/.netlify/functions/updateData', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(parsed)
+              body: JSON.stringify(obj)
             });
             const result = await res.json();
-            if (!res.ok) throw new Error(result.message || res.statusText);
-            this.statusMessage = '✅ 存檔成功';
+            if (!res.ok || !result.success) {
+              throw new Error(result.message || res.statusText);
+            }
+            this.statusMessage = '✅ 新增成功';
+            this.newKey = '';
+            this.newValue = '';
+            await this.load();  // 重新讀取最新資料
           } catch (e) {
-            this.statusMessage = '❌ 存檔失敗：' + e.message;
+            this.statusMessage = '❌ 新增失敗：' + e.message;
           } finally {
-            this.saving = false;
+            this.adding = false;
           }
         }
       }
