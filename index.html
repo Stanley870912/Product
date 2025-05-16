@@ -182,23 +182,40 @@
         authorized: false,
         partner_id: "",
 
-        authCheck() {
-          const lastLoginTime = localStorage.getItem("lastLoginTime");
+        async authCheck() {
+          const last = localStorage.getItem("lastLoginTime");
           const now = Date.now();
-
-          if (lastLoginTime && now - Number(lastLoginTime) < 57600000) {
-            // 16小時57600000
+          // 16 小時內免重複驗證
+          if (last && now - Number(last) < 16 * 60 * 60 * 1000) {
             this.authorized = true;
-            this.loadData();
-          } else {
-            const password = prompt("請輸入密碼才能進入：");
-            if (password == 1234) {
-              localStorage.setItem("lastLoginTime", now);
+            return this.loadData();
+          }
+
+          const pwd = prompt("請輸入密碼才能進入：");
+          if (pwd === null) {
+            this.authorized = false;
+            return;
+          }
+
+          try {
+            const res = await fetch("/.netlify/functions/auth", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: pwd })
+            });
+            const json = await res.json();
+            if (res.ok && json.ok) {
               this.authorized = true;
+              localStorage.setItem("lastLoginTime", now);
               this.loadData();
             } else {
+              alert("密碼錯誤，請再試一次！");
               this.authorized = false;
             }
+          } catch (e) {
+            console.error("驗證失敗：", e);
+            alert("伺服器連線失敗，請稍後再試");
+            this.authorized = false;
           }
         },
         init() { },
@@ -251,7 +268,7 @@
           // 先把 partner_id 存下來
           const dataToSave = {
             partnerId: this.partner_id,
-            date:new Date().toLocaleDateString(),
+            date: new Date().toLocaleDateString(),
             items: {}
           };
 
