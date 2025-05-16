@@ -3,6 +3,12 @@ const TOKEN  = process.env.GITHUB_TOKEN;
 const REPO   = process.env.GITHUB_REPO;
 const BRANCH = process.env.GITHUB_BRANCH;
 
+// Helper：把 "2025/5/16" 這種格式轉成 Date 物件（年, 月-1, 日）
+function parseOrderDate(str) {
+  const [y, m, d] = str.split('/').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -12,12 +18,12 @@ exports.handler = async (event) => {
   let newOrder;
   try {
     newOrder = JSON.parse(event.body);
-  } catch (e) {
+  } catch {
     return { statusCode: 400, body: 'Invalid JSON' };
   }
 
   try {
-    // 1. 拿 metadata + content
+    // 1. 讀取現有 data.json 的 metadata + 內容
     const metaRes = await fetch(
       `https://api.github.com/repos/${REPO}/contents/data.json?ref=${BRANCH}`,
       { headers: { Authorization: `token ${TOKEN}` } }
@@ -26,21 +32,27 @@ exports.handler = async (event) => {
       return { statusCode: metaRes.status, body: await metaRes.text() };
     }
     const { sha, content, encoding } = await metaRes.json();
-    const existing = JSON.parse(Buffer.from(content, encoding).toString());
+    const data = JSON.parse(Buffer.from(content, encoding).toString());
 
-    // 2. 建立日期索引
-    // 假設 data.json 預設結構為 { orders: [] }
-    existing.orders = Array.isArray(existing.orders) ? existing.orders : [];
+    // 2. 確保 orders 是陣列
+    const orders = Array.isArray(data.orders) ? data.orders : [];
 
-    // 3. 過濾掉同日期 & 同 partnerId 的舊訂單
-    const filtered = existing.orders.filter(o =>
-      !(o.date === newOrder.date && o.partnerId === newOrder.partnerId)
-    );
+    // 3. 建立「7 天前」的門檻日期
+    const now       = new Date();
+    const threshold = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
 
-    // 4. 再 push 新訂單
+    // 4. 過濾：只留下日期 >= threshold，且不是同 partner+date 的舊訂單
+    const filtered = orders.filter(o => {
+      const od = parseOrderDate(o.date);
+      const isOld      = od < threshold;
+      const isSameKey  = (o.date === newOrder.date && o.partnerId === newOrder.partnerId);
+      return !isOld && !isSameKey;
+    });
+
+    // 5. 把新訂單推入
     filtered.push(newOrder);
 
-    // 5. 寫回 GitHub
+    // 6. 寫回 GitHub
     const putRes = await fetch(
       `https://api.github.com/repos/${REPO}/contents/data.json`,
       {
@@ -52,7 +64,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           message: `Upsert order ${newOrder.partnerId} @ ${newOrder.date}`,
           content: Buffer.from(
-            JSON.stringify({ ...existing, orders: filtered }, null, 2)
+            JSON.stringify({ orders: filtered }, null, 2)
           ).toString('base64'),
           sha,
           branch: BRANCH
