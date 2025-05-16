@@ -1,8 +1,6 @@
 // netlify/functions/getData.js
 const faunadb = require('faunadb');
 const q = faunadb.query;
-
-// 使用環境變數 FAUNA_SECRET 初始化客戶端
 const client = new faunadb.Client({
   secret: process.env.FAUNA_SECRET
 });
@@ -10,16 +8,15 @@ const client = new faunadb.Client({
 exports.handler = async () => {
   try {
     let data;
-
     try {
-      // 嘗試讀取已存在的 document
+      // 1. 讀取既有 document
       const resp = await client.query(
         q.Get(q.Ref(q.Collection('configs'), 'data'))
       );
       data = resp.data;
-    } catch (error) {
-      // 如果是 404，表示 document 還沒建立，於是自動建立並回傳預設資料
-      if (error.requestResult?.statusCode === 404) {
+    } catch (err) {
+      // 2. 如果是 404 → 文件不存在 → 自動建立
+      if (err.requestResult?.statusCode === 404) {
         const createResp = await client.query(
           q.Create(
             q.Ref(q.Collection('configs'), 'data'),
@@ -28,22 +25,19 @@ exports.handler = async () => {
         );
         data = createResp.data;
       } else {
-        // 其他錯誤則拋出
-        throw error;
+        throw err;
       }
     }
-
-    // 成功回傳雲端資料
     return {
       statusCode: 200,
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" }
     };
-
-  } catch (error) {
-    // 發生意外
+  } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ error: err.message }),
+      headers: { "Content-Type": "application/json" }
     };
   }
 };
