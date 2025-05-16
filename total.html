@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>試算表</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+</head>
+<body x-data="productApp()" x-init="loadData()">
+
+  <div class="container my-5">
+    <h2 class="text-center mb-4">產品試算器</h2>
+
+    <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
+      <button class="btn btn-outline-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
+        <span x-text="showOnlyWithCount ? '全部商品' : '只顯示有數量'"></span>
+      </button>
+      <button class="btn btn-outline-primary" @click="toggleSelectAll()">
+        <span x-text="isAllChecked() ? '取消全選' : '全選'"></span>
+      </button>
+    </div>
+
+    <!-- 非第9組 (餅類) -->
+    <h4>餅類</h4>
+    <table class="table table-bordered">
+      <thead class="table-light text-center">
+        <tr>
+          <th>勾選</th>
+          <th>品名</th>
+          <th>單價</th>
+          <th>數量</th>
+          <th>小計</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="item in otherItems()" :key="item.product_name">
+          <tr class="text-center" x-show="!showOnlyWithCount || item.count > 0">
+            <td>
+              <input type="checkbox" x-model="item.checked" />
+            </td>
+            <td x-text="item.product_name"></td>
+            <td x-text="item.price"></td>
+            <td>
+              <input type="number" class="form-control form-control-sm"
+                     x-model.number="item.count"
+                     @input="update(item)" min="0" />
+            </td>
+            <td x-text="item.total.toFixed(2)"></td>
+          </tr>
+        </template>
+      </tbody>
+      <tfoot class="table-secondary text-end">
+        <tr>
+          <td colspan="4"><strong>小計</strong></td>
+          <td><strong x-text="calculateOtherGroupsTotal().toFixed(2)"></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- 第9組 (零食類) -->
+    <h4>零食類</h4>
+    <table class="table table-bordered">
+      <thead class="table-light text-center">
+        <tr>
+          <th>品名</th>
+          <th>單價</th>
+          <th>數量</th>
+          <th>小計</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="item in group9Items()" :key="item.product_name">
+          <tr class="text-center" x-show="!showOnlyWithCount || item.count > 0">
+            <td x-text="item.product_name"></td>
+            <td x-text="item.price"></td>
+            <td>
+              <input type="number" class="form-control form-control-sm"
+                     x-model.number="item.count"
+                     @input="update(item)" min="0" />
+            </td>
+            <td x-text="item.total.toFixed(2)"></td>
+          </tr>
+        </template>
+      </tbody>
+      <tfoot class="table-secondary text-end">
+        <tr>
+          <td colspan="4"><strong>小計</strong></td>
+          <td><strong x-text="calculateGroup9Total().toFixed(2)"></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- 總計 -->
+    <div class="text-end mt-4">
+      <h4>總計：<span x-text="calculateTotal().toFixed(2)"></span></h4>
+    </div>
+  </div>
+
+  <script>
+    function productApp() {
+      return {
+        items: [],
+        showOnlyWithCount: false,
+
+        async loadData() {
+          try {
+            // const res = await fetch('non_pickup.json');
+            const res = await fetch('/.netlify/functions/getData');
+
+            this.items = (await res.json()).map(item => ({
+              ...item,
+              count: 0,
+              checked: false,
+              total: 0
+            }));
+            this.items = data.map(item => {
+                const saved = savedData.items?.[item.product_name] || {};
+                const count = saved.count || 0;
+                const checked = saved.checked || false;
+                const total = count * item.price;
+
+                return {
+                  ...item,
+                  count,
+                  total,
+                  checked
+                };
+              });
+            
+
+
+          } catch (e) {
+            console.error('載入產品清單失敗：', e);
+          }
+        },
+
+        update(item) {
+          item.total = (item.count || 0) * (item.price || 0);
+        },
+
+        group9Items() {
+          return this.items.filter(i => i.product_group === 9);
+        },
+        otherItems() {
+          return this.items.filter(i => i.product_group !== 9);
+        },
+
+        calculateGroup9Total() {
+          return this.group9Items()
+            .filter(i => i.checked && i.count > 0)
+            .reduce((sum, i) => sum + i.total, 0);
+        },
+        calculateOtherGroupsTotal() {
+          return this.otherItems()
+            .filter(i => i.checked && i.count > 0)
+            .reduce((sum, i) => sum + i.total, 0);
+        },
+        calculateTotal() {
+          return this.calculateGroup9Total() + this.calculateOtherGroupsTotal();
+        },
+
+        isAllChecked() {
+          return this.items.length > 0 && this.items.every(i => i.checked);
+        },
+        toggleSelectAll() {
+          const newState = !this.isAllChecked();
+          this.items.forEach(i => i.checked = newState);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
