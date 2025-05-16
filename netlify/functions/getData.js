@@ -1,8 +1,7 @@
 // netlify/functions/getData.js
-const fetch = require('node-fetch');
-const TOKEN = process.env.GITHUB_TOKEN;
-const REPO  = process.env.GITHUB_REPO;
-const BRANCH= process.env.GITHUB_BRANCH;
+const TOKEN  = process.env.GITHUB_TOKEN;
+const REPO   = process.env.GITHUB_REPO;
+const BRANCH = process.env.GITHUB_BRANCH;
 
 exports.handler = async () => {
   try {
@@ -21,9 +20,6 @@ exports.handler = async () => {
       body: json
     };
   } catch (e) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: e.message })
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
   }
 };
