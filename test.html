@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>編輯雲端 JSON</title>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    textarea { width:100%; height:300px; font-family:monospace; font-size:14px; }
+    button { margin-top:0.5rem; padding:0.5rem 1rem; }
+  </style>
+</head>
+<body x-data="jsonEditor()" x-init="load()">
+
+  <h1>雲端 JSON 編輯器</h1>
+  <textarea x-model="content"></textarea>
+  <br>
+  <button @click="save()">存回雲端</button>
+
+  <script>
+    function jsonEditor() {
+      return {
+        content: '',
+        // 讀取 JSON
+        async load() {
+          try {
+            const res = await fetch('/.netlify/functions/getData');
+            if (!res.ok) throw new Error(res.statusText);
+            const data = await res.json();
+            this.content = JSON.stringify(data, null, 2);
+          } catch (e) {
+            alert('讀取失敗：' + e.message);
+          }
+        },
+        // 寫回 JSON
+        async save() {
+          try {
+            // 驗證 JSON
+            const parsed = JSON.parse(this.content);
+            const res = await fetch('/.netlify/functions/updateData', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(parsed)
+            });
+            if (!res.ok) throw new Error((await res.json()).message || res.statusText);
+            alert('存檔成功！');
+          } catch (e) {
+            alert('存檔失敗：' + e.message);
+          }
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
