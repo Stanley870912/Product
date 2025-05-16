@@ -8,15 +8,16 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  let newData;
+  // 解析前端傳來的新 JSON 片段
+  let patch;
   try {
-    newData = JSON.parse(event.body);
-  } catch {
+    patch = JSON.parse(event.body);
+  } catch (e) {
     return { statusCode: 400, body: 'Invalid JSON' };
   }
 
   try {
-    // 1. 取 SHA
+    // 1. 先拿現有的 data.json metadata（含 sha）和內容
     const metaRes = await fetch(
       `https://api.github.com/repos/${REPO}/contents/data.json?ref=${BRANCH}`,
       { headers: { Authorization: `token ${TOKEN}` } }
@@ -24,15 +25,13 @@ exports.handler = async (event) => {
     if (!metaRes.ok) {
       return { statusCode: metaRes.status, body: await metaRes.text() };
     }
-    const { sha } = await metaRes.json();
+    const { sha, content, encoding } = await metaRes.json();
+    const existing = JSON.parse(Buffer.from(content, encoding).toString());
 
-    // 2. PUT 更新
-    const putBody = {
-      message: "Update data.json via Netlify Function",
-      content: Buffer.from(JSON.stringify(newData, null, 2)).toString('base64'),
-      sha,
-      branch: BRANCH
-    };
+    // 2. 合併（淺拷貝）：newObj 覆蓋 existing 的屬性
+    const merged = { ...existing, ...patch };
+
+    // 3. 提交回 GitHub
     const putRes = await fetch(
       `https://api.github.com/repos/${REPO}/contents/data.json`,
       {
@@ -41,18 +40,28 @@ exports.handler = async (event) => {
           Authorization: `token ${TOKEN}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(putBody)
+        body: JSON.stringify({
+          message: "Merge JSON via Netlify Function",
+          content: Buffer.from(JSON.stringify(merged, null, 2)).toString('base64'),
+          sha,
+          branch: BRANCH
+        })
       }
     );
     if (!putRes.ok) {
       return { statusCode: putRes.status, body: await putRes.text() };
     }
+
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ success: true })
+      body: JSON.stringify({ success: true, data: merged })
     };
   } catch (e) {
-    return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ success: false, message: e.message })
+    };
   }
 };

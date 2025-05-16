@@ -204,25 +204,41 @@
         init() { },
 
         loadData() {
-          const fileName =
-            this.authorized == true ? "non_pickup.json" : "error.json";
+          const fileName = this.authorized
+            ? "non_pickup.json"
+            : "error.json";
 
-          if (this.authorized == true && Math.random() < 0.01) {
+          // 1% 機率跑彩蛋
+          if (this.authorized && Math.random() < 0.01) {
             const modal = new bootstrap.Modal(
               document.getElementById("easterEggModal")
             );
             modal.show();
           }
+
+          // 紀錄目前 source
           localStorage.setItem("jsonSource", this.currentSource);
-          const savedData = JSON.parse(
-            localStorage.getItem("productData_" + this.currentSource) || "{}"
-          );
+
+          // 先拿 partner_id
           this.partner_id = localStorage.getItem("partner_id") || "";
+
+          // 用同樣的 key 讀回資料
+          const storageKey = `productData_${this.currentSource}_${this.partner_id}`;
+          let savedData = {};
+          try {
+            savedData = JSON.parse(
+              localStorage.getItem(storageKey) || "{}"
+            );
+          } catch (e) {
+            console.warn("解析儲存資料失敗，使用空物件", e);
+          }
+
           fetch(fileName)
-            .then((response) => response.json())
-            .then((data) => {
-              this.items = data.map((item) => {
-                const saved = savedData[item.product_name] || {};
+            .then(res => res.json())
+            .then(data => {
+              this.items = data.map(item => {
+                // 從 savedData.items 裡找對應 product_name
+                const saved = savedData.items?.[item.product_name] || {};
                 const count = saved.count || 0;
                 const checked = saved.checked || false;
                 const total = count * item.price;
@@ -231,11 +247,11 @@
                   ...item,
                   count,
                   total,
-                  checked,
+                  checked
                 };
               });
             })
-            .catch((error) => console.error("無法載入資料:", error));
+            .catch(error => console.error("無法載入資料:", error));
         },
 
         update(item) {
@@ -244,17 +260,26 @@
         },
 
         saveToLocalStorage() {
-          const dataToSave = {};
-          this.items.forEach((item) => {
-            dataToSave[item.product_name] = {
+          // 先把 partner_id 存下來
+          const dataToSave = {
+            partnerId: this.partner_id,
+            items: {}
+          };
+
+          // 把每個商品的 count 跟 checked 放到 items 底下
+          this.items.forEach(item => {
+            dataToSave.items[item.product_name] = {
               count: item.count,
-              checked: item.checked,
+              checked: item.checked
             };
           });
-          localStorage.setItem(
-            "productData_" + this.currentSource,
-            JSON.stringify(dataToSave)
-          );
+
+          // 如果想要把 partner_id 也加到 key 裡面，就可以把 key 改成這樣：
+          const storageKey = `productData_${this.currentSource}_${this.partner_id}`;
+          // 如果不想改 key 的話，就用原本的：
+          // const storageKey = `productData_${this.currentSource}`;
+
+          localStorage.setItem(storageKey, JSON.stringify(dataToSave));
         },
 
         group9Items() {
