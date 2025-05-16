@@ -2,92 +2,51 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>雲端 JSON 編輯器</title>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <style>
-    body { font-family: sans-serif; padding: 2rem; max-width: 800px; margin: auto; }
-    h1 { margin-bottom: 1rem; }
-    textarea { width:100%; height:200px; font-family:monospace; font-size:14px; padding:0.5rem; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; }
-    .btn { margin-top:0.5rem; padding:0.6rem 1.2rem; background:#4f46e5; color:#fff; border:none; border-radius:4px; cursor:pointer; }
-    .btn:disabled { background:#a5b4fc; cursor:not-allowed; }
-    .status { margin-top:0.5rem; font-size:0.9rem; }
-    .input-row { display:flex; gap:0.5rem; margin-bottom:1rem; }
-    .input-row input { flex:1; padding:0.5rem; border:1px solid #ccc; border-radius:4px; }
-  </style>
+  <title>JSON 編輯範例</title>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body x-data="jsonEditor()" x-init="load()">
+<body x-data="jsonApp()" x-init="load()">
+  <h1>目前資料</h1>
+  <pre x-text="JSON.stringify(items, null, 2)"></pre>
 
-  <h1>雲端 JSON 編輯器</h1>
-
-  <!-- 範例：讓使用者輸入一個 key/value，新物件會長這樣 { key: 'xxx', value: 'yyy' } -->
-  <div class="input-row">
-    <input type="text" placeholder="key" x-model="newKey">
-    <input type="text" placeholder="value" x-model="newValue">
-    <button class="btn" :disabled="adding" @click="addItem()">➕ 新增</button>
-  </div>
-
-  <!-- 顯示原始 JSON -->
-  <textarea readonly x-text="content"></textarea>
-
-  <!-- 狀態訊息 -->
-  <div class="status" x-text="statusMessage"></div>
+  <h2>新增一筆</h2>
+  <input type="text" x-model="newText" placeholder='{"foo":"bar"}'/>
+  <button @click="add()">Add</button>
 
   <script>
-    function jsonEditor() {
+    function jsonApp() {
       return {
-        content: '',             // 讀到的 JSON 字串
-        statusMessage: '',       // 顯示狀態
-        newKey: '', newValue: '',// 新增用欄位
-        adding: false,
+        items: null,
+        newText: '',
 
-        // 讀取雲端 JSON
         async load() {
-          this.statusMessage = '讀取中…';
-          try {
-            const res = await fetch('/.netlify/functions/getData');
-            if (!res.ok) throw new Error(res.statusText);
-            const data = await res.json();
-            this.content = JSON.stringify(data, null, 2);
-            this.statusMessage = '✅ 讀取完成';
-          } catch (e) {
-            this.statusMessage = '❌ 讀取失敗：' + e.message;
-          }
+          const res = await fetch('/.netlify/functions/getData')
+          this.items = await res.json()
         },
 
-        // 新增一筆 { key, value }
-        async addItem() {
-          if (!this.newKey) {
-            this.statusMessage = '請輸入 key';
-            return;
-          }
-          const obj = { [this.newKey]: this.newValue };
-
-          this.adding = true;
-          this.statusMessage = '新增中…';
+        async add() {
+          let obj
           try {
-            const res = await fetch('/.netlify/functions/updateData', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(obj)
-            });
-            const result = await res.json();
-            if (!res.ok || !result.success) {
-              throw new Error(result.message || res.statusText);
-            }
-            this.statusMessage = '✅ 新增成功';
-            this.newKey = '';
-            this.newValue = '';
-            await this.load();  // 重新讀取最新資料
-          } catch (e) {
-            this.statusMessage = '❌ 新增失敗：' + e.message;
-          } finally {
-            this.adding = false;
+            obj = JSON.parse(this.newText)
+          } catch {
+            alert('JSON 解析錯誤！')
+            return
           }
-        }
+
+          const res = await fetch('/.netlify/functions/updateData', {
+            method: 'POST',
+            body: JSON.stringify({ newItem: obj }),
+          })
+          const json = await res.json()
+          if (json.success) {
+            this.items = json.data
+            this.newText = ''
+          } else {
+            alert('更新失敗：' + json.error)
+          }
+        },
       }
     }
   </script>
-
 </body>
 </html>

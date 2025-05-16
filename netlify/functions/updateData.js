@@ -1,41 +1,36 @@
-// netlify/functions/updateData.js
-const faunadb = require('faunadb');
-const q = faunadb.query;
-const client = new faunadb.Client({
-  secret: process.env.FAUNA_SECRET
-});
+const fs   = require('fs')
+const path = require('path')
 
 exports.handler = async (event) => {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: '只允許 POST' }
+  }
+
   try {
-    // 解析前端送來的一筆新物件
-    const newItem = JSON.parse(event.body);
+    const payload  = JSON.parse(event.body)
+    const filePath = path.resolve(__dirname, '../non_pickup.json')
+    const raw      = fs.readFileSync(filePath, 'utf8')
+    const data     = JSON.parse(raw)
 
-    // 讀取現有 document
-    const getResp = await client.query(
-      q.Get(q.Ref(q.Collection('configs'), 'data'))
-    );
-    const existing = getResp.data || {};
-    const items = Array.isArray(existing.items) ? existing.items : [];
+    // 假設 data 是一個陣列，我們就 push 新項目
+    if (Array.isArray(data)) {
+      data.push(payload.newItem)
+    } else {
+      // 否則覆寫成 payload.newData
+      Object.assign(data, payload.newData)
+    }
 
-    // 新項目加入陣列
-    items.push(newItem);
-
-    // 寫回 FaunaDB
-    const updateResp = await client.query(
-      q.Update(
-        q.Ref(q.Collection('configs'), 'data'),
-        { data: { ...existing, items } }
-      )
-    );
+    // 寫回檔案（注意 Netlify 啟動時 functions 夾會被寫入在暫存，部署後寫入不保證持久）
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8')
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, data: updateResp.data })
-    };
-  } catch (error) {
+      body: JSON.stringify({ success: true, data }),
+    }
+  } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ success: false, message: error.message })
-    };
+      body: JSON.stringify({ error: err.message }),
+    }
   }
-};
+}
