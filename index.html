@@ -121,7 +121,7 @@
 
         <!-- 第二列：下拉選單 -->
         <div class="col-3">
-          <select class="form-select text-center" style="font-size: 1rem" x-model="partner_id">
+          <select class="form-select text-center" style="font-size: 1rem" x-model="partner_id" @change="saveToLocalStorage()">
             <option value="" selected>成員</option>
             <option value="北一">北一</option>
             <option value="北二">北二</option>
@@ -361,7 +361,7 @@
         },
 
         resetAll() {
-          localStorage.removeItem("productData_" + this.currentSource);
+          localStorage.removeItem("productData");
           this.loadData();
         },
 
