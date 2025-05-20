@@ -367,6 +367,13 @@
         },
         SendOrder() {
 
+          if (this.partner_id === "") {
+            alert("請選擇成員！");
+            return;
+          } else {
+            localStorage.setItem("partner_id", this.partner_id);
+          }
+
           if (!this.checkOrderTime()) {
             return;
           }
