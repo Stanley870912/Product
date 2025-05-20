@@ -309,7 +309,6 @@
             this.calculateGroup9Total() + this.calculateOtherGroupsTotal()
           );
         },
-
         generateText() {
           if (this.partner_id === "") {
             alert("請選擇成員！");
@@ -350,9 +349,6 @@
 
           this.$refs.outputText.value = text;
           this.copyToClipboard();
-
-
-
         },
         checkOrderTime() {
           const now = new Date();
@@ -367,12 +363,17 @@
         },
         SendOrder() {
 
+
+
           if (this.partner_id === "") {
             alert("請選擇成員！");
             return;
           } else {
             localStorage.setItem("partner_id", this.partner_id);
           }
+          
+          //生成文字方便預覽
+          generateText();
 
           if (!this.checkOrderTime()) {
             return;
