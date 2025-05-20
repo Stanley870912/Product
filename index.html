@@ -349,6 +349,7 @@
 
           this.$refs.outputText.value = text;
           this.copyToClipboard();
+          return text;
         },
         checkOrderTime() {
           const now = new Date();
@@ -371,20 +372,18 @@
           } else {
             localStorage.setItem("partner_id", this.partner_id);
           }
-          
+
           //生成文字方便預覽
-          generateText();
+          var text = generateText();
 
-          if (!this.checkOrderTime()) {
-            return;
-          }
-
-          const ok = confirm("確認是否送出訂單!");
-          if (ok) {
-            this.sendToGmail(text);
-            this.merge(
-              localStorage.getItem("productData") || "{}"
-            );
+          if (this.checkOrderTime()) {
+            const ok = confirm("確認是否送出訂單!");
+            if (ok) {
+              this.sendToGmail(text);
+              this.merge(
+                localStorage.getItem("productData") || "{}"
+              );
+            }
           }
         },
         copyToClipboard() {
