@@ -116,7 +116,10 @@
         <!-- 第一列：生成文字按鈕 -->
         <div class="col-12">
           <button class="btn btn-primary w-100" @click="generateText()">
-             送出訂單(生成文字並複製)
+             生成文字並複製
+          </button>
+          <button class="btn btn-secondary w-100" @click="SendOrder()">
+             送出訂單
           </button>
         </div>
 
@@ -347,14 +350,17 @@
           this.$refs.outputText.value = text;
           this.copyToClipboard();
 
-          const ok = confirm("確認是否送出訂單!");
+
+
+        },
+        SendOrder() {
+           const ok = confirm("確認是否送出訂單!");
           if (ok) {
             this.sendToGmail(text);
             this.merge(
               localStorage.getItem("productData") || "{}"
             );
           }
-
         },
         copyToClipboard() {
           this.$refs.outputText.select();
