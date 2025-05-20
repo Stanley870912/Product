@@ -116,16 +116,17 @@
         <!-- 第一列：生成文字按鈕 -->
         <div class="col-12 d-flex justify-content-between">
           <button class="btn btn-primary w-45" @click="generateText()">
-             生成文字並複製
+            生成文字並複製
           </button>
           <button class="btn btn-warning w-45" @click="SendOrder()">
-             送出訂單
+            送出訂單
           </button>
         </div>
 
         <!-- 第二列：下拉選單 -->
         <div class="col-3">
-          <select class="form-select text-center" style="font-size: 1rem" x-model="partner_id" @change="saveToLocalStorage()">
+          <select class="form-select text-center" style="font-size: 1rem" x-model="partner_id"
+            @change="saveToLocalStorage()">
             <option value="" selected>成員</option>
             <option value="北一">北一</option>
             <option value="北二">北二</option>
@@ -353,8 +354,24 @@
 
 
         },
+        checkOrderTime() {
+          const now = new Date();
+          const hour = now.getHours();
+
+          if (hour < 9 || hour >= 14) {
+            alert("訂單送出時間為（9:00～14:00）!");
+            return false;
+          }
+
+          return true;
+        },
         SendOrder() {
-           const ok = confirm("確認是否送出訂單!");
+
+          if (!this.checkOrderTime()) {
+            return;
+          }
+
+          const ok = confirm("確認是否送出訂單!");
           if (ok) {
             this.sendToGmail(text);
             this.merge(
