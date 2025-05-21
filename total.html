@@ -56,7 +56,7 @@
     <div class="row mb-3 g-2">
       <div class="col-auto">
         <!-- 日期選單 -->
-        <select x-model="selectedDate" @change="loadData()" class="form-select">
+        <select x-model="selectedDate" @change="selectedPartners = []; loadData()" class="form-select">
           <template x-for="d in dates" :key="d">
             <option :value="d" x-text="d"></option>
           </template>
@@ -190,7 +190,6 @@
 
           async loadData() {
             if (!this.selectedDate) return;
-            this.selectedPartners= [];
             try {
               const res = await fetch("/.netlify/functions/getData");
               if (!res.ok) throw new Error(res.statusText);
