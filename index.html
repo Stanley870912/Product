@@ -343,8 +343,9 @@
 
           this.$refs.outputText.value = text;
           this.copyToClipboard();
-          return text;
           this.sendToGmail(text);
+          
+          return text;
         },
 
         copyToClipboard() {
