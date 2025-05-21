@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>文字轉 JSON 工具</title>
+  <title>手動訂單收集器</title>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
@@ -12,6 +12,12 @@
 
   <h1 class="mb-3 mt-5 text-center">手動訂單收集器</h1>
   <div x-data="textToJsonConverter()" class="container">
+    <div class="mb-3 d-flex justify-content-between">
+      <button type="button" class="btn btn-primary fs-1" @click="pasteFromClipboard()">貼上</button>
+      <button type="button" class="btn btn-danger fs-1" @click="reset()">重置</button>
+    </div>
+
+
     <textarea x-model="inputText" class="form-control" placeholder="貼上文字格式資料" style="min-height: 60vh;"></textarea>
 
 
@@ -25,7 +31,25 @@
       return {
         inputText: '',
         jsonOutput: '',
-
+        reset() {
+          this.inputText = '';
+          this.jsonOutput = '';
+        },
+        pasteFromClipboard() {
+          if (!navigator.clipboard || !navigator.clipboard.readText) {
+            return alert('你的瀏覽器不支援 Clipboard API');
+          }
+          navigator.clipboard.readText()
+            .then(text => {
+              this.inputText = text;
+              // 如有自動縮放或其他邏輯，可手動觸發
+              this.adjustFont?.();
+            })
+            .catch(err => {
+              console.error(err);
+              alert('讀取剪貼簿失敗：' + err);
+            });
+        },
         async convert() {
           const lines = this.inputText.split("\n").map(l => l.trim()).filter(l => l !== "");
           const result = {
