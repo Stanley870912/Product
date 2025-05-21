@@ -106,9 +106,6 @@
         <li>
           系統只會對有打勾的產品進行金額試算喔！如果不想一個一個選，可以點選『全選』來加快操作～
         </li>
-        <li>增加發送最終訂單功能，方便統整訂單資訊</li>
-        <li>最新的一份訂單會覆蓋上一個舊訂單，所以如果送出後發現有誤，可以再重新傳送!</li>
-        <li>訂單系統還在測試中，請還是要複製一份傳到 Line !</li>
       </ol>
 
       <!-- 功能按鈕 -->
@@ -347,42 +344,9 @@
           this.$refs.outputText.value = text;
           this.copyToClipboard();
           return text;
+          this.sendToGmail(text);
         },
-        checkOrderTime() {
-          const now = new Date();
-          const hour = now.getHours();
 
-          if (hour < 9 || hour >= 14) {
-            alert("訂單送出時間為（9:00～14:00）!");
-            return false;
-          }
-
-          return true;
-        },
-        SendOrder() {
-
-
-
-          if (this.partner_id === "") {
-            alert("請選擇成員！");
-            return;
-          } else {
-            localStorage.setItem("partner_id", this.partner_id);
-          }
-
-          //生成文字方便預覽
-          var text = this.generateText();
-
-          if (this.checkOrderTime()) {
-            const ok = confirm("確認是否送出訂單!");
-            if (ok) {
-              this.sendToGmail(text);
-              this.merge(
-                localStorage.getItem("productData") || "{}"
-              );
-            }
-          }
-        },
         copyToClipboard() {
           this.$refs.outputText.select();
           document.execCommand("copy");
@@ -429,31 +393,7 @@
             })
             .catch((err) => {
             });
-        },
-        async merge(patch) {
-          let obj;
-          try {
-            obj = JSON.parse(patch);
-          } catch (e) {
-            return;
-          }
-          try {
-            const res = await fetch('/.netlify/functions/updateData', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(obj)
-            });
-            const result = await res.json();
-
-            if (!res.ok || !result.success) {
-              throw new Error(result.message || res.statusText);
-            }
-            alert('已送出訂單！');
-          } catch (e) {
-            alert("訂單送出失敗！");
-          } finally {
-          }
-        },
+        }
 
       };
     }
