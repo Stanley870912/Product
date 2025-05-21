@@ -67,7 +67,7 @@
         <template x-for="p in partnerOptions" :key="p">
           <div class="form-check form-check-inline">
             <input class="form-check-input" type="checkbox" :id="`radio-${p}`" :value="p" x-model="selectedPartners"
-              @change="loadData()" />
+              @change="loadData();" />
             <label class="form-check-label" :for="`radio-${p}`" x-text="p"></label>
           </div>
         </template>
@@ -161,12 +161,12 @@
     </div> -->
 
     <!-- 生成文字 -->
-    <div class="text-center mt-4">
-      <button class="btn btn-primary" @click="generateText()">
+     <div class="text-center mt-4">
+      <!-- <button class="btn btn-primary" @click="generateText()">
         生成文字
-      </button>
-      <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
-    </div>
+      </button> -->
+      <textarea x-ref="outputText" class="form-control mt-2" rows="25" readonly></textarea>
+    </div> 
 
     <script>
       function productApp() {
@@ -221,7 +221,7 @@
               const prodRes = await fetch("non_pickup.json");
               const products = await prodRes.json();
 
-              this.items = products.map((p) => {
+               this.items = await products.map((p) => {
                 const cnt = agg[p.product_name] || 0;
                 return {
                   ...p,
@@ -230,6 +230,9 @@
                   total: cnt * p.price
                 };
               });
+
+             this.generateText();
+
             } catch (e) {
               console.error("載入失敗", e);
             }
