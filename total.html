@@ -284,17 +284,6 @@
               }
             });
 
-            text +=
-              "\n\n餅類:" +
-              this.calculateOtherGroupsTotal().toFixed(2) +
-              "元;\n" +
-              "糖果類:" +
-              this.calculateGroup9Total().toFixed(2) +
-              "元;\n" +
-              "總金額: " +
-              this.calculateTotal().toFixed(2) +
-              "元;";
-
             this.$refs.outputText.value = text;
             this.copyToClipboard();
           },
