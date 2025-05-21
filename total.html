@@ -190,6 +190,7 @@
 
           async loadData() {
             if (!this.selectedDate) return;
+            this.selectedPartners= [];
             try {
               const res = await fetch("/.netlify/functions/getData");
               if (!res.ok) throw new Error(res.statusText);
