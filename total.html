@@ -6,15 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>訂單加總</title>
   <!-- Bootstrap CSS 先載入 -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-    <style>
-    body { background-color: #f8f9fa; }
-    .card { border-radius: .75rem; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15); }
-    textarea { resize: vertical; font-family: ui-monospace, Menlo, Monaco, Consolas; }
-  </style>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
   <!-- 先做密碼驗證，通過後再動態載入 Alpine.js -->
   <script>
@@ -74,32 +66,21 @@
         <!-- Partner 多選 -->
         <template x-for="p in partnerOptions" :key="p">
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              :id="`radio-${p}`"
-              :value="p"
-              x-model="selectedPartners"
-              @change="loadData()"
-            />
+            <input class="form-check-input" type="checkbox" :id="`radio-${p}`" :value="p" x-model="selectedPartners"
+              @change="loadData()" />
             <label class="form-check-label" :for="`radio-${p}`" x-text="p"></label>
           </div>
         </template>
       </div>
-      <!-- <div class="col-auto d-flex align-items-center">
-        <button
-          class="btn btn-outline-secondary"
-          @click="showOnlyWithCount = !showOnlyWithCount"
-        >
-          <span
-            x-text="showOnlyWithCount ? '顯示全部' : '只看有數量'"
-          ></span>
+      <div class="col-auto d-flex align-items-center">
+        <button class="btn btn-outline-secondary" @click="showOnlyWithCount = !showOnlyWithCount">
+          <span x-text="showOnlyWithCount ? '顯示全部' : '只看有數量'"></span>
         </button>
-      </div> -->
+      </div>
     </div>
 
     <!-- 餅類 -->
-    <!-- <h4>餅類</h4>
+    <h4>餅類</h4>
     <table class="table table-bordered text-center">
       <thead class="table-light">
         <tr>
@@ -119,13 +100,8 @@
             <td x-text="item.product_name"></td>
             <td x-text="item.price"></td>
             <td>
-              <input
-                type="number"
-                class="form-control form-control-sm"
-                x-model.number="item.count"
-                @input="update(item)"
-                min="0"
-              />
+              <input type="number" class="form-control form-control-sm" x-model.number="item.count"
+                @input="update(item)" min="0" />
             </td>
             <td x-text="item.total.toFixed(2)"></td>
           </tr>
@@ -139,10 +115,10 @@
           </td>
         </tr>
       </tfoot>
-    </table> -->
+    </table>
 
     <!-- 零食類 -->
-    <!-- <h4>零食類</h4>
+    <h4>零食類</h4>
     <table class="table table-bordered text-center">
       <thead class="table-light">
         <tr>
@@ -162,13 +138,8 @@
             <td x-text="item.product_name"></td>
             <td x-text="item.price"></td>
             <td>
-              <input
-                type="number"
-                class="form-control form-control-sm"
-                x-model.number="item.count"
-                @input="update(item)"
-                min="0"
-              />
+              <input type="number" class="form-control form-control-sm" x-model.number="item.count"
+                @input="update(item)" min="0" />
             </td>
             <td x-text="item.total.toFixed(2)"></td>
           </tr>
@@ -182,154 +153,154 @@
           </td>
         </tr>
       </tfoot>
-    </table> -->
+    </table>
 
     <!-- 總計 -->
-    <!-- <div class="text-end mt-4">
+    <div class="text-end mt-4">
       <h4>總計：<span x-text="calculateTotal().toFixed(2)"></span></h4>
-    </div> -->
+    </div>
 
     <!-- 生成文字 -->
     <div class="text-center mt-4">
-      <button
-        class="btn btn-primary"
-        @click="generateText()"
-      >
+      <button class="btn btn-primary" @click="generateText()">
         生成文字
-    </button>
-    <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
-  </div>
+      </button>
+      <textarea x-ref="outputText" class="form-control mt-2" rows="5" readonly></textarea>
+    </div>
 
-  <script>
-    function productApp() {
-      return {
-        dates: [],
-        selectedDate: "",
-        partnerOptions: [],
-        selectedPartners: [],
-        items: [],
-        showOnlyWithCount: true,
+    <script>
+      function productApp() {
+        return {
+          dates: [],
+          selectedDate: "",
+          partnerOptions: [],
+          selectedPartners: [],
+          items: [],
+          showOnlyWithCount: true,
 
-        init() {
-          const today = new Date();
-          this.dates = Array.from({ length: 7 }, (_, i) => {
-            const d = new Date(today);
-            d.setDate(today.getDate() - i);
-            return d.toLocaleDateString("zh-Hant");
-          });
-          this.selectedDate = this.dates[0];
-        },
-
-        async loadData() {
-          if (!this.selectedDate) return;
-          try {
-            const res = await fetch("/.netlify/functions/getData");
-            if (!res.ok) throw new Error(res.statusText);
-            const { orders } = await res.json();
-            const todayOrders = orders.filter(
-              (o) => o.date === this.selectedDate
-            );
-
-            this.partnerOptions = [
-              ...new Set(todayOrders.map((o) => o.partnerId))
-            ];
-            if (this.selectedPartners.length === 0) {
-              this.selectedPartners = [...this.partnerOptions];
-            }
-
-            const agg = {};
-            todayOrders
-              .filter((o) => this.selectedPartners.includes(o.partnerId))
-              .forEach((o) => {
-                Object.entries(o.items).forEach(
-                  ([name, { count, checked }]) => {
-                    if (checked) {
-                      agg[name] = (agg[name] || 0) + (count || 0);
-                    }
-                  }
-                );
-              });
-
-            const prodRes = await fetch("non_pickup.json");
-            const products = await prodRes.json();
-
-            this.items = products.map((p) => {
-              const cnt = agg[p.product_name] || 0;
-              return {
-                ...p,
-                count: cnt,
-                checked: cnt > 0,
-                total: cnt * p.price
-              };
+          init() {
+            const today = new Date();
+            this.dates = Array.from({ length: 7 }, (_, i) => {
+              const d = new Date(today);
+              d.setDate(today.getDate() - i);
+              return d.toLocaleDateString("zh-Hant");
             });
-          } catch (e) {
-            console.error("載入失敗", e);
-          }
-        },
+            this.selectedDate = this.dates[0];
+          },
 
-        update(item) {
-          item.total = (item.count || 0) * item.price;
-        },
+          async loadData() {
+            if (!this.selectedDate) return;
+            try {
+              const res = await fetch("/.netlify/functions/getData");
+              if (!res.ok) throw new Error(res.statusText);
+              const { orders } = await res.json();
+              const todayOrders = orders.filter(
+                (o) => o.date === this.selectedDate
+              );
 
-        group9Items() {
-          return this.items.filter((i) => i.product_group === 9);
-        },
-        otherItems() {
-          return this.items.filter((i) => i.product_group !== 9);
-        },
-        calculateGroup9Total() {
-          return this.group9Items().reduce(
-            (s, i) => s + (i.checked && i.count > 0 ? i.total : 0),
-            0
-          );
-        },
-        calculateOtherGroupsTotal() {
-          return this.otherItems().reduce(
-            (s, i) => s + (i.checked && i.count > 0 ? i.total : 0),
-            0
-          );
-        },
-        calculateTotal() {
-          return this.calculateGroup9Total() + this.calculateOtherGroupsTotal();
-        },
-        generateText() {          
-          let text =
-            "日期: " +
-            new Date().toLocaleDateString() +
-            ";\n" +
-            "成員: " +
-            (this.selectedPartners[0] || "")  +
-            ";\n\n";
-          let lastGroup = null;
-
-          this.items.forEach((item) => {
-            if (item.checked && item.count > 0) {
-              if (item.product_group !== lastGroup) {
-                if (lastGroup !== null) text += "\n";
-                lastGroup = item.product_group;
+              this.partnerOptions = [
+                ...new Set(todayOrders.map((o) => o.partnerId))
+              ];
+              if (this.selectedPartners.length === 0) {
+                this.selectedPartners = [...this.partnerOptions];
               }
 
-              text += `【${item.product_name}】:${item.count};\n`;
+              const agg = {};
+              todayOrders
+                .filter((o) => this.selectedPartners.includes(o.partnerId))
+                .forEach((o) => {
+                  Object.entries(o.items).forEach(
+                    ([name, { count, checked }]) => {
+                      if (checked) {
+                        agg[name] = (agg[name] || 0) + (count || 0);
+                      }
+                    }
+                  );
+                });
+
+              const prodRes = await fetch("non_pickup.json");
+              const products = await prodRes.json();
+
+              this.items = products.map((p) => {
+                const cnt = agg[p.product_name] || 0;
+                return {
+                  ...p,
+                  count: cnt,
+                  checked: cnt > 0,
+                  total: cnt * p.price
+                };
+              });
+            } catch (e) {
+              console.error("載入失敗", e);
             }
-          });
+          },
 
-          text +=
-            "\n\n餅類:" +
-            this.calculateOtherGroupsTotal().toFixed(2) +
-            "元;\n" +
-            "糖果類:" +
-            this.calculateGroup9Total().toFixed(2) +
-            "元;\n" +
-            "總金額: " +
-            this.calculateTotal().toFixed(2) +
-            "元;";
+          update(item) {
+            item.total = (item.count || 0) * item.price;
+          },
 
-          this.$refs.outputText.value = text;
-          this.copyToClipboard();
-        },
-      };
-    }
-  </script>
+          group9Items() {
+            return this.items.filter((i) => i.product_group === 9);
+          },
+          otherItems() {
+            return this.items.filter((i) => i.product_group !== 9);
+          },
+          calculateGroup9Total() {
+            return this.group9Items().reduce(
+              (s, i) => s + (i.checked && i.count > 0 ? i.total : 0),
+              0
+            );
+          },
+          calculateOtherGroupsTotal() {
+            return this.otherItems().reduce(
+              (s, i) => s + (i.checked && i.count > 0 ? i.total : 0),
+              0
+            );
+          },
+          calculateTotal() {
+            return this.calculateGroup9Total() + this.calculateOtherGroupsTotal();
+          },
+          generateText() {
+            // 把所有成員用「、」分隔，如果陣列空的話就會得到空字串
+            const members = this.selectedPartners.join('、');
+
+            let text =
+              "日期: " +
+              this.selectedDate +
+              ";\n" +
+              "成員: " +
+              members +
+              ";\n\n";
+
+            let lastGroup = null;
+
+            this.items.forEach((item) => {
+              if (item.checked && item.count > 0) {
+                if (item.product_group !== lastGroup) {
+                  if (lastGroup !== null) text += "\n";
+                  lastGroup = item.product_group;
+                }
+                text += `【${item.product_name}】:${item.count};\n`;
+              }
+            });
+
+            text +=
+              "\n\n餅類:" +
+              this.calculateOtherGroupsTotal().toFixed(2) +
+              "元;\n" +
+              "糖果類:" +
+              this.calculateGroup9Total().toFixed(2) +
+              "元;\n" +
+              "總金額: " +
+              this.calculateTotal().toFixed(2) +
+              "元;";
+
+            this.$refs.outputText.value = text;
+            this.copyToClipboard();
+          },
+        };
+      }
+    </script>
 </body>
 
 </html>
