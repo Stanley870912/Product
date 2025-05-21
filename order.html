@@ -53,23 +53,28 @@
               alert('讀取剪貼簿失敗：' + err);
             });
         },
-        convert() {
+        parseLines() {
           const lines = this.inputText.split('\n').map(l => l.trim()).filter(l => l);
-          const result = { date: '', partner: '', items: [] };
+          const payload = { partnerId: '', date: '', items: {} };
           for (let line of lines) {
             if (line.startsWith('日期:')) {
-              result.date = line.replace('日期:', '').replace(/;$/,'').trim();
+              payload.date = line.replace('日期:', '').replace(/;$/,'').trim();
             } else if (line.startsWith('成員:')) {
-              result.partner = line.replace('成員:', '').replace(/;$/,'').trim();
+              payload.partnerId = line.replace('成員:', '').replace(/;$/,'').trim();
             } else if (line.startsWith('【')) {
               const match = line.match(/【(.+?)】:(\d+);?/);
-              if (match) result.items.push({ name: match[1], count: +match[2] });
+              if (match) {
+                const name = match[1];
+                const count = parseInt(match[2], 10);
+                payload.items[name] = { count: count, checked: true };
+              }
             }
           }
-          return result;
+          return payload;
         },
         async sendOrder() {
-          const payload = this.convert();
+          const payload = this.parseLines();
+          console.log('Parsed Payload:', JSON.stringify(payload));
           try {
             const res = await fetch('/.netlify/functions/updateData', {
               method: 'POST',
