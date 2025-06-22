@@ -51,6 +51,7 @@
     function textToJsonConverter() {
       return {
         inputText: '',
+        warningLine: '',
         reset() {
           this.inputText = '';
         },
@@ -108,7 +109,7 @@
 
               } else {
                 console.warn(`Unrecognized line format: "${line}"`);
-                alert(`無法識別的行格式: "${line}"`);
+                this.warningLine += `${line}\n`;
               }
             });
 
@@ -116,6 +117,7 @@
         },
         async sendOrder() {
           const payload = this.parseLines();
+          if(this.warningLine!="") alert(`無法識別的行格式: "${this.warningLine}"`);
           console.log('Parsed Payload:', JSON.stringify(payload));
           try {
             const res = await fetch('/.netlify/functions/updateData', {
