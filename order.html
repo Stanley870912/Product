@@ -117,7 +117,7 @@
         },
         async sendOrder() {
           const payload = this.parseLines();
-          if(this.warningLine!="") alert(`無法識別的行格式: "${this.warningLine}"`);
+          if(this.warningLine!="") alert(`無法識別的行格式: ${this.warningLine}`);
           console.log('Parsed Payload:', JSON.stringify(payload));
           try {
             const res = await fetch('/.netlify/functions/updateData', {
