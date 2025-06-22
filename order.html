@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,11 +8,22 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
-    body { background-color: #f8f9fa; }
-    .card { border-radius: .75rem; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15); }
-    textarea { resize: vertical; font-family: ui-monospace, Menlo, Monaco, Consolas; }
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .card {
+      border-radius: .75rem;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    textarea {
+      resize: vertical;
+      font-family: ui-monospace, Menlo, Monaco, Consolas;
+    }
   </style>
 </head>
+
 <body x-data="textToJsonConverter()" class="py-5">
   <div class="container">
     <div class="row justify-content-center">
@@ -54,44 +66,67 @@
             });
         },
         parseLines() {
-          const lines = this.inputText.split('\n').map(l => l.trim()).filter(l => l);
+          // 先拆行、trim、過濾空行
+          const lines = this.inputText
+            .split('\n')
+            .map(l => l.trim())
+            .filter(l => l);
+
+          // 收集所有以「【」開頭的 item 行
+          const itemLines = lines.filter(line => line.startsWith('【'));
+          // 把它們接成一條字串
+          const itemsText = itemLines.join('').trim();
+          // 確保最後有個分號
+          const text = itemsText.endsWith(';') ? itemsText : itemsText + ';';
+
+          // 完整驗證：必須是一或多筆 【品名】:正整數;
+          const fullRegex = /^(\s*【[^】]+】\s*:\s*[1-9]\d*\s*;)+$/;
+          if (!fullRegex.test(text)) {
+            alert('格式錯誤：所有項目都應該是「【品名】:正整數;」的形式');
+            return;  // 直接結束，不做後續解析
+          }
+
+          // 以下開始正常解析
           const payload = { partnerId: '', date: '', items: {} };
           for (let line of lines) {
             if (line.startsWith('日期:')) {
-              payload.date = line.replace('日期:', '').replace(/;$/,'').trim();
+              payload.date = line.replace('日期:', '').replace(/;$/, '').trim();
             } else if (line.startsWith('成員:')) {
-              payload.partnerId = line.replace('成員:', '').replace(/;$/,'').trim();
-            } else if (line.startsWith('【')) {
-              const match = line.match(/【(.+?)】:(\d+);?/);
-              if (match) {
-                const name = match[1];
-                const count = parseInt(match[2], 10);
-                payload.items[name] = { count: count, checked: true };
-              }
+              payload.partnerId = line.replace('成員:', '').replace(/;$/, '').trim();
             }
           }
+
+          // 用全域 regex 逐一抓出 name / count
+          const itemRegex = /【([^】]+)】:(\d+);/g;
+          let match;
+          while ((match = itemRegex.exec(text)) !== null) {
+            const [, name, num] = match;
+            payload.items[name] = { count: parseInt(num, 10), checked: true };
+          }
+
           return payload;
         },
         async sendOrder() {
           const payload = this.parseLines();
           console.log('Parsed Payload:', JSON.stringify(payload));
-          try {
-            const res = await fetch('/.netlify/functions/updateData', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-            const result = await res.json();
-            if (!res.ok || !result.success) throw new Error(result.message || res.statusText);
-            alert('已送出訂單！');
-            this.reset();
-          } catch (e) {
-            console.error(e);
-            alert('訂單送出失敗：' + e.message);
-          }
+          // try {
+          //   const res = await fetch('/.netlify/functions/updateData', {
+          //     method: 'POST',
+          //     headers: { 'Content-Type': 'application/json' },
+          //     body: JSON.stringify(payload)
+          //   });
+          //   const result = await res.json();
+          //   if (!res.ok || !result.success) throw new Error(result.message || res.statusText);
+          //   alert('已送出訂單！');
+          //   this.reset();F
+          // } catch (e) {
+          //   console.error(e);
+          //   alert('訂單送出失敗：' + e.message);
+          // }
         }
       };
     }
   </script>
 </body>
+
 </html>
