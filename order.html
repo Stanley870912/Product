@@ -66,63 +66,71 @@
             });
         },
         parseLines() {
-          // 先拆行、trim、過濾空行
-          const lines = this.inputText
+          const DATE_RE = /^日期:(.+?);?$/;
+          const MEMBER_RE = /^成員:(.+?);?$/;
+          const ITEM_RE = /^【(.+?)】:(\d+);?$/;
+          const CAT_RE = /^(.+?):([\d.]+)元;?$/;   // 品類小計或總金額的通用格式
+          const TOTAL_RE = /^總金額:\s*([\d.]+)元;?$/; // 如果要專門擷取總金額
+
+          const payload = { partnerId: '', date: '', items: {} };
+
+          this.inputText
             .split('\n')
             .map(l => l.trim())
-            .filter(l => l);
+            .filter(Boolean)
+            .forEach(line => {
+              let m;
+              if (DATE_RE.test(line)) {
+                [, m] = DATE_RE.exec(line);
+                payload.date = m.trim();
 
-          // 收集所有以「【」開頭的 item 行
-          const itemLines = lines.filter(line => line.startsWith('【'));
-          // 把它們接成一條字串
-          const itemsText = itemLines.join('').trim();
-          // 確保最後有個分號
-          const text = itemsText.endsWith(';') ? itemsText : itemsText + ';';
+              } else if (MEMBER_RE.test(line)) {
+                [, m] = MEMBER_RE.exec(line);
+                payload.partnerId = m.trim();
 
-          // 完整驗證：必須是一或多筆 【品名】:正整數;
-          const fullRegex = /^(\s*【[^】]+】\s*:\s*[1-9]\d*\s*;)+$/;
-          if (!fullRegex.test(text)) {
-            alert('格式錯誤：所有項目都應該是「【品名】:正整數;」的形式');
-            return;  // 直接結束，不做後續解析
-          }
+              } else if (ITEM_RE.test(line)) {
+                const [, name, countStr] = ITEM_RE.exec(line);
+                payload.items[name] = { count: Number(countStr), checked: true };
 
-          // 以下開始正常解析
-          const payload = { partnerId: '', date: '', items: {} };
-          for (let line of lines) {
-            if (line.startsWith('日期:')) {
-              payload.date = line.replace('日期:', '').replace(/;$/, '').trim();
-            } else if (line.startsWith('成員:')) {
-              payload.partnerId = line.replace('成員:', '').replace(/;$/, '').trim();
-            }
-          }
+              } else if (TOTAL_RE.test(line)) {
+                // 「總金額」可以選擇存到 payload.total，或單純忽略
+                // const [, totalStr] = TOTAL_RE.exec(line);
+                // payload.total = Number(totalStr);
+                // → 若不需要，直接跳過，不再警告
+                return;
 
-          // 用全域 regex 逐一抓出 name / count
-          const itemRegex = /【([^】]+)】:(\d+);/g;
-          let match;
-          while ((match = itemRegex.exec(text)) !== null) {
-            const [, name, num] = match;
-            payload.items[name] = { count: parseInt(num, 10), checked: true };
-          }
+              } else if (CAT_RE.test(line)) {
+                // 這裡是「餅類:19055.00元;」「糖果類:2200.00元;」等小計
+                // 如果未來要支援解析，把下面兩行打開：
+                // const [, category, amountStr] = CAT_RE.exec(line);
+                // payload.items[category] = { subtotal: Number(amountStr) };
+                return;  // 單純忽略也可
+
+              } else {
+                console.warn(`Unrecognized line format: "${line}"`);
+              }
+            });
 
           return payload;
         },
+
         async sendOrder() {
           const payload = this.parseLines();
           console.log('Parsed Payload:', JSON.stringify(payload));
-           try {
-             const res = await fetch('/.netlify/functions/updateData', {
-               method: 'POST',
-               headers: { 'Content-Type': 'application/json' },
-               body: JSON.stringify(payload)
-             });
-             const result = await res.json();
-             if (!res.ok || !result.success) throw new Error(result.message || res.statusText);
-             alert('已送出訂單！');
-             this.reset();F
-           } catch (e) {
-             console.error(e);
-             alert('訂單送出失敗：' + e.message);
-           }
+          try {
+            const res = await fetch('/.netlify/functions/updateData', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (!res.ok || !result.success) throw new Error(result.message || res.statusText);
+            alert('已送出訂單！');
+            this.reset();
+          } catch (e) {
+            console.error(e);
+            alert('訂單送出失敗：' + e.message);
+          }
         }
       };
     }
