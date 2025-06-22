@@ -108,12 +108,12 @@
 
               } else {
                 console.warn(`Unrecognized line format: "${line}"`);
+                alert(`無法識別的行格式: "${line}"`);
               }
             });
 
           return payload;
         },
-
         async sendOrder() {
           const payload = this.parseLines();
           console.log('Parsed Payload:', JSON.stringify(payload));
