@@ -249,11 +249,7 @@
                 const saved = savedData.items?.[item.product_name] || {};
                 const count = saved.count || 0;
                 let checked = saved.checked || false;
-                
-                // 預設運費(南部)為勾選狀態
-                if (item.product_name === "運費(南部)") {
-                  checked = saved.checked !== undefined ? saved.checked : true;
-                }
+              
                 
                 const total = count * item.price;
 
@@ -330,17 +326,20 @@
             localStorage.setItem("partner_id", this.partner_id);
           }
           
-          // 檢查是否有勾選運費相關項目
-          const hasShippingSelected = this.items.some(item => 
-            item.checked && 
-            (item.product_name === "運費(南部)" || item.product_name === "運費(北部)")
+          // 檢查是否有勾選運費相關項目且數量為1
+          const shippingItem = this.items.find(item => 
+            item.checked && item.count > 0 &&
+            (item.product_name === "運費(南部)" || item.product_name === "運費(北部)"|| item.product_name === "運費(自取)")
           );
           
-          if (!hasShippingSelected) {
-            const shouldContinue = confirm("您尚未勾選運費項目，確定要繼續生成訂單嗎？");
-            if (!shouldContinue) {
-              return;
-            }
+          if (!shippingItem) {
+            alert("請勾選運費項目（南部或北部或自取）且數量設為1！");
+            return;
+          }
+          
+          if (shippingItem.count !== 1) {
+            alert("運費數量必須為1！");
+            return;
           }
           
           let text =
