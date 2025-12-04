@@ -491,23 +491,18 @@
     },
     {
         "product_group": 9,
+        "product_name": "筷子肉乾(原味) (包)",
+        "price": 1400
+    },
+    {
+        "product_group": 9,
         "product_name": "筷子肉乾(黑胡椒) (包)",
-        "price": 1325
+        "price": 1400
     },
     {
         "product_group": 9,
         "product_name": "筷子肉乾(蒜味) (包)",
-        "price": 1325
-    },
-    {
-        "product_group": 9,
-        "product_name": "筷子肉乾(原味) (包)",
-        "price": 1325
-    },
-    {
-        "product_group": 9,
-        "product_name": "牛扎糖(咖啡)(斤)",
-        "price": 320
+        "price": 1400
     },
     {
         "product_group": 9,
@@ -517,6 +512,11 @@
     {
         "product_group": 9,
         "product_name": "牛扎糖(原味)(斤)",
+        "price": 320
+    },
+    {
+        "product_group": 9,
+        "product_name": "牛扎糖(咖啡)(斤)",
         "price": 320
     },
     {
