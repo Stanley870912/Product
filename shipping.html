@@ -20,34 +20,34 @@
   </style>
 </head>
 
-<body x-data="shippingDocGenerator()" x-init="init()" class="my-5">
+<body x-data="shippingDocGenerator()" x-init="init()" class="my-3">
   <div class="container">
-    <h2 class="text-center mb-4">出貨單產生器</h2>
-
     <!-- 輸入區域 -->
-    <div class="row mb-4 no-print">
+    <div class="row mb-3 no-print">
       <div class="col-12">
         <div class="card">
-          <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">貼上訂單資料</h5>
-            <small x-show="!dataLoaded && !loadError">正在載入產品資料...</small>
-            <small x-show="dataLoaded" class="text-success">✓ 產品資料已載入</small>
-            <small x-show="loadError" class="text-danger">✗ 資料載入失敗</small>
-          </div>
-          <div class="card-body">
-            <div class="d-flex justify-content-end gap-2 mb-3">
-              <button type="button" class="btn btn-outline-primary btn-sm" @click="pasteFromClipboard()">貼上</button>
-              <button type="button" class="btn btn-outline-danger btn-sm" @click="reset()">重置</button>
-              <button class="btn btn-primary btn-sm" @click="parseAndLoad()">載入資料</button>
+          <div class="card-header bg-primary text-white py-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>出貨單產生器</strong>
+                <small class="ms-2" x-show="dataLoaded">✓</small>
+              </div>
+              <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-light btn-sm" @click="pasteFromClipboard()">貼上</button>
+                <button class="btn btn-success btn-sm" @click="parseAndLoad()">載入</button>
+                <button type="button" class="btn btn-outline-light btn-sm" @click="reset()">重置</button>
+              </div>
             </div>
-            <textarea x-model="inputText" class="form-control" placeholder="請在此貼上訂單資料，格式範例：&#10;&#10;成員:張三&#10;日期:2025-12-19&#10;【蛋黃酥】:10&#10;【綠豆椪】:5&#10;餅類:1500.00元&#10;總金額:1500.00元" rows="8" style="font-family: monospace;"></textarea>
+          </div>
+          <div class="card-body py-2">
+            <textarea x-model="inputText" class="form-control" placeholder="請貼上訂單資料" rows="5" style="font-family: monospace; font-size: 0.9rem;"></textarea>
           </div>
         </div>
       </div>
     </div>
 
     <!-- 成員和日期 -->
-    <div class="row mb-3" x-show="member || date">
+    <div class="row mb-2" x-show="member || date">
       <div class="col-md-6">
         <strong>成員：</strong><span x-text="member"></span>
       </div>
