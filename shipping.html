@@ -25,7 +25,6 @@
     .shipping-document {
       background-color: white;
       padding: 1.5rem;
-      border: 2px solid #333;
       border-radius: .5rem;
       font-family: "Courier New", Courier, monospace;
     }
@@ -42,13 +41,15 @@
     .shipping-info {
       margin-bottom: 0.8rem;
       line-height: 1.6;
+      display: flex;
+      justify-content: space-between;
     }
 
     .shipping-items {
-      margin: 1rem 0;
+      margin: 0.5rem 0;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      gap: 0.5rem;
     }
 
     .shipping-items table {
@@ -59,7 +60,7 @@
     .shipping-items th,
     .shipping-items td {
       border: 1px solid #333;
-      padding: 0.5rem;
+      padding: 0.25rem 0.4rem;
       text-align: left;
     }
 
@@ -93,7 +94,6 @@
       }
 
       .shipping-document {
-        border: 2px solid #000;
         box-shadow: none;
       }
     }
