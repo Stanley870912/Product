@@ -119,7 +119,7 @@
               <button type="button" class="btn btn-outline-primary" @click="pasteFromClipboard()">貼上</button>
               <button type="button" class="btn btn-outline-danger" @click="reset()">重置</button>
             </div>
-            <textarea x-model="inputText" class="form-control mb-3" placeholder="請在此貼上訂單資料，格式範例：&#10;&#10;成員:張三&#10;日期:2025-12-19&#10;【蛋黃酥】:10&#10;【綠豆椪】:5&#10;餅類:1500.00元&#10;總金額:1500.00元" rows="10"></textarea>
+            <textarea x-model="inputText" class="form-control mb-3" placeholder="請在此貼上訂單資料" rows="10"></textarea>
           </div>
           <div class="card-footer bg-white border-0 text-center">
             <button class="btn btn-primary btn-lg px-5" @click="generateDocument()">產生出貨單</button>
@@ -156,7 +156,7 @@
                   <tr x-show="index % 2 === 0">
                     <td x-text="item.name"></td>
                     <td style="text-align: center;" x-text="item.count"></td>
-                    <td style="text-align: right;" x-text="item.subtotal.toFixed(2)"></td>
+                    <td style="text-align: right;" x-text="Math.round(item.subtotal)"></td>
                   </tr>
                 </template>
               </tbody>
@@ -176,7 +176,7 @@
                   <tr x-show="index % 2 === 1">
                     <td x-text="item.name"></td>
                     <td style="text-align: center;" x-text="item.count"></td>
-                    <td style="text-align: right;" x-text="item.subtotal.toFixed(2)"></td>
+                    <td style="text-align: right;" x-text="Math.round(item.subtotal)"></td>
                   </tr>
                 </template>
               </tbody>
@@ -184,7 +184,7 @@
           </div>
 
           <div class="shipping-total">
-            餅類：<span x-text="cakeTotal.toFixed(2)"></span> 元　　糖果類：<span x-text="candyTotal.toFixed(2)"></span> 元　　總金額：<span x-text="total.toFixed(2)"></span> 元
+            餅類：<span x-text="Math.round(cakeTotal)"></span> 元　　糖果類：<span x-text="Math.round(candyTotal)"></span> 元　　總金額：<span x-text="Math.round(total)"></span> 元
           </div>
         </div>
       </div>
@@ -381,10 +381,10 @@
           text += '品名\t\t數量\t小計\n';
           text += '─'.repeat(40) + '\n';
           this.items.forEach(item => {
-            text += `${item.name}\t\t${item.count}\t${item.subtotal.toFixed(2)}\n`;
+            text += `${item.name}\t\t${item.count}\t${Math.round(item.subtotal)}\n`;
           });
           text += '─'.repeat(40) + '\n';
-          text += `總金額：${this.total.toFixed(2)} 元\n`;
+          text += `總金額：${Math.round(this.total)} 元\n`;
 
           try {
             await navigator.clipboard.writeText(text);
