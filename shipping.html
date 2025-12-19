@@ -3,86 +3,11 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>出貨單產生器</title>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
-    body {
-      background-color: #f8f9fa;
-    }
-
-    .card {
-      border-radius: .75rem;
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    }
-
-    textarea {
-      resize: vertical;
-      font-family: ui-monospace, Menlo, Monaco, Consolas;
-    }
-
-    .shipping-document {
-      background-color: white;
-      padding: 2rem;
-      border: 2px solid #333;
-      border-radius: .5rem;
-      font-family: "Courier New", Courier, monospace;
-    }
-
-    .shipping-header {
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 1.5rem;
-      border-bottom: 2px solid #333;
-      padding-bottom: 0.5rem;
-    }
-
-    .shipping-info {
-      margin-bottom: 1rem;
-      line-height: 1.8;
-    }
-
-    .shipping-items {
-      margin: 1.5rem 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .shipping-items table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .shipping-items th,
-    .shipping-items td {
-      border: 1px solid #333;
-      padding: 0.5rem;
-      text-align: left;
-    }
-
-    .shipping-items th {
-      background-color: #e9ecef;
-      font-weight: bold;
-    }
-
-    @media (max-width: 768px) {
-      .shipping-items {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .shipping-total {
-      margin-top: 1.5rem;
-      text-align: right;
-      font-size: 1.2rem;
-      font-weight: bold;
-      border-top: 2px solid #333;
-      padding-top: 0.5rem;
-    }
-
     @media print {
       body {
         background-color: white;
@@ -91,112 +16,89 @@
       .no-print {
         display: none !important;
       }
-
-      .shipping-document {
-        border: 2px solid #000;
-        box-shadow: none;
-      }
     }
   </style>
 </head>
 
-<body x-data="shippingDocGenerator()" x-init="init()" class="py-5">
+<body x-data="shippingDocGenerator()" x-init="init()" class="my-5">
   <div class="container">
+    <h2 class="text-center mb-4">出貨單產生器</h2>
+
     <!-- 輸入區域 -->
-    <div class="row justify-content-center mb-4 no-print">
-      <div class="col-12 col-lg-8">
+    <div class="row mb-4 no-print">
+      <div class="col-12">
         <div class="card">
-          <div class="card-header text-center bg-white border-0 pb-0">
-            <h2 class="fw-bold">出貨單產生器</h2>
-            <div class="mt-2">
-              <span x-show="!dataLoaded && !loadError" class="badge bg-warning">正在載入產品資料...</span>
-              <span x-show="dataLoaded" class="badge bg-success">產品資料已載入 ✓</span>
-              <span x-show="loadError" class="badge bg-danger">資料載入失敗</span>
-            </div>
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">貼上訂單資料</h5>
+            <small x-show="!dataLoaded && !loadError">正在載入產品資料...</small>
+            <small x-show="dataLoaded" class="text-success">✓ 產品資料已載入</small>
+            <small x-show="loadError" class="text-danger">✗ 資料載入失敗</small>
           </div>
           <div class="card-body">
             <div class="d-flex justify-content-end gap-2 mb-3">
-              <button type="button" class="btn btn-outline-primary" @click="pasteFromClipboard()">貼上</button>
-              <button type="button" class="btn btn-outline-danger" @click="reset()">重置</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" @click="pasteFromClipboard()">貼上</button>
+              <button type="button" class="btn btn-outline-danger btn-sm" @click="reset()">重置</button>
+              <button class="btn btn-primary btn-sm" @click="parseAndLoad()">載入資料</button>
             </div>
-            <textarea x-model="inputText" class="form-control mb-3" placeholder="請在此貼上訂單資料，格式範例：&#10;&#10;成員:張三&#10;日期:2025-12-19&#10;【蛋黃酥】:10&#10;【綠豆椪】:5&#10;餅類:1500.00元&#10;總金額:1500.00元" rows="10"></textarea>
-          </div>
-          <div class="card-footer bg-white border-0 text-center">
-            <button class="btn btn-primary btn-lg px-5" @click="generateDocument()">產生出貨單</button>
-            <button class="btn btn-success btn-lg px-5 ms-2" @click="printDocument()" x-show="documentGenerated">列印</button>
-            <button class="btn btn-info btn-lg px-5 ms-2" @click="copyDocument()" x-show="documentGenerated">複製</button>
+            <textarea x-model="inputText" class="form-control" placeholder="請在此貼上訂單資料，格式範例：&#10;&#10;成員:張三&#10;日期:2025-12-19&#10;【蛋黃酥】:10&#10;【綠豆椪】:5&#10;餅類:1500.00元&#10;總金額:1500.00元" rows="8" style="font-family: monospace;"></textarea>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 出貨單顯示區域 -->
-    <div class="row justify-content-center" x-show="documentGenerated">
-      <div class="col-12 col-lg-10">
-        <div class="shipping-document" id="shippingDoc">
-          <div class="shipping-header" x-text="header"></div>
-          
-          <div class="shipping-info">
-            <div><strong>成員：</strong><span x-text="member"></span></div>
-            <div><strong>日期：</strong><span x-text="date"></span></div>
-          </div>
-
-          <div class="shipping-items">
-            <!-- 左側表格 -->
-            <table>
-              <thead>
-                <tr>
-                  <th>品名</th>
-                  <th style="text-align: center; width: 80px;">數量</th>
-                  <th style="text-align: right; width: 100px;">小計</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template x-for="(item, index) in items" :key="item.name">
-                  <tr x-show="index % 2 === 0">
-                    <td x-text="item.name"></td>
-                    <td style="text-align: center;" x-text="item.count"></td>
-                    <td style="text-align: right;" x-text="item.subtotal.toFixed(2)"></td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-            
-            <!-- 右側表格 -->
-            <table>
-              <thead>
-                <tr>
-                  <th>品名</th>
-                  <th style="text-align: center; width: 80px;">數量</th>
-                  <th style="text-align: right; width: 100px;">小計</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template x-for="(item, index) in items" :key="item.name + '_right'">
-                  <tr x-show="index % 2 === 1">
-                    <td x-text="item.name"></td>
-                    <td style="text-align: center;" x-text="item.count"></td>
-                    <td style="text-align: right;" x-text="item.subtotal.toFixed(2)"></td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="shipping-total">
-            總金額：<span x-text="total.toFixed(2)"></span> 元
-          </div>
-        </div>
+    <!-- 成員和日期 -->
+    <div class="row mb-3" x-show="member || date">
+      <div class="col-md-6">
+        <strong>成員：</strong><span x-text="member"></span>
+      </div>
+      <div class="col-md-6">
+        <strong>日期：</strong><span x-text="date"></span>
       </div>
     </div>
+
+    <!-- 商品表格 -->
+    <template x-if="items.length > 0">
+      <div>
+        <table class="table table-bordered table-striped">
+          <thead class="table-primary text-center">
+            <tr>
+              <th>品名</th>
+              <th style="width: 100px;">數量</th>
+              <th style="width: 120px;">小計</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="item in items" :key="item.name">
+              <tr class="text-center">
+                <td class="text-start" x-text="item.name"></td>
+                <td x-text="item.count"></td>
+                <td x-text="item.subtotal.toFixed(2)"></td>
+              </tr>
+            </template>
+          </tbody>
+          <tfoot>
+            <tr class="table-info text-end">
+              <td colspan="2"><strong>總金額</strong></td>
+              <td class="text-center">
+                <strong x-text="total.toFixed(2)"></strong>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <!-- 功能按鈕 -->
+        <div class="mt-4 d-flex gap-2 no-print">
+          <button class="btn btn-success" @click="window.print()">列印</button>
+          <button class="btn btn-info" @click="copyDocument()">複製</button>
+        </div>
+      </div>
+    </template>
   </div>
 
   <script>
     function shippingDocGenerator() {
       return {
         inputText: '',
-        documentGenerated: false,
-        header: '出 貨 單',
         member: '',
         date: '',
         items: [],
@@ -206,25 +108,21 @@
         loadError: false,
 
         async init() {
-          // 載入產品資料
           try {
             const res = await fetch('non_pickup.json');
-            if (!res.ok) {
-              throw new Error(`HTTP ${res.status}`);
-            }
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             this.productData = await res.json();
             this.dataLoaded = true;
             console.log('產品資料載入成功，共', this.productData.length, '項');
           } catch (error) {
             console.error('無法載入產品資料:', error);
             this.loadError = true;
-            alert('無法載入產品資料。\n請確認此頁面是透過本地伺服器開啟（如 Live Server）。\n直接開啟 HTML 文件可能會有 CORS 限制。');
+            alert('無法載入產品資料。\n請確認此頁面是透過本地伺服器開啟（如 Live Server）。');
           }
         },
 
         reset() {
           this.inputText = '';
-          this.documentGenerated = false;
           this.member = '';
           this.date = '';
           this.items = [];
@@ -243,12 +141,22 @@
             });
         },
 
-        parseInput() {
+        parseAndLoad() {
+          if (!this.inputText.trim()) {
+            alert('請先輸入或貼上訂單資料');
+            return;
+          }
+
+          if (!this.dataLoaded || this.productData.length === 0) {
+            alert('產品資料尚未載入，請稍候再試或重新整理頁面');
+            return;
+          }
+
           const DATE_RE = /^日期:(.+?);?$/;
           const MEMBER_RE = /^成員:(.+?);?$/;
           const ITEM_RE = /^【(.+?)】:(\d+);?$/;
           const TOTAL_RE = /^總金額:\s*([\d.]+)元;?$/;
-          const CAT_RE = /^(.+?):([\d.]+)元;?$/;   // 品類小計
+          const CAT_RE = /^(.+?):([\d.]+)元;?$/;
 
           const data = {
             member: '',
@@ -275,7 +183,6 @@
               const [, name, countStr] = ITEM_RE.exec(line);
               const count = Number(countStr);
               
-              // 從產品資料中查找價格
               const product = this.productData.find(p => p.product_name === name.trim());
               const price = product ? product.price : 0;
               const subtotal = count * price;
@@ -290,31 +197,9 @@
               const [, totalStr] = TOTAL_RE.exec(line);
               data.total = Number(totalStr);
             } else if (CAT_RE.test(line)) {
-              // 忽略品類小計，如「餅類:19055.00元」
               return;
-            } else {
-              console.warn(`無法識別的行格式: "${line}"`);
             }
           });
-
-          return data;
-        },
-
-        generateDocument() {
-          console.log('開始產生出貨單');
-          
-          if (!this.inputText.trim()) {
-            alert('請先輸入或貼上訂單資料');
-            return;
-          }
-
-          if (!this.dataLoaded || this.productData.length === 0) {
-            alert('產品資料尚未載入，請稍候再試或重新整理頁面');
-            return;
-          }
-
-          const data = this.parseInput();
-          console.log('解析結果:', data);
 
           if (!data.member) {
             alert('找不到成員資訊\n請確認格式：成員:XXX');
@@ -335,34 +220,17 @@
           this.date = data.date;
           this.items = data.items;
           
-          // 如果沒有提供總金額，就自動計算
           if (data.total === 0) {
             this.total = data.items.reduce((sum, item) => sum + item.subtotal, 0);
           } else {
             this.total = data.total;
           }
-          
-          this.documentGenerated = true;
 
-          // 滾動到出貨單
-          setTimeout(() => {
-            const doc = document.getElementById('shippingDoc');
-            if (doc) {
-              doc.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }, 100);
-        },
-
-        printDocument() {
-          window.print();
+          console.log('載入成功:', { member: this.member, date: this.date, items: this.items.length, total: this.total });
         },
 
         async copyDocument() {
-          const doc = document.getElementById('shippingDoc');
-          if (!doc) return;
-
-          // 生成純文字版本
-          let text = this.header + '\n\n';
+          let text = '出 貨 單\n\n';
           text += `成員：${this.member}\n`;
           text += `日期：${this.date}\n\n`;
           text += '品名\t\t數量\t小計\n';
