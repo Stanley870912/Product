@@ -148,7 +148,6 @@
                 <tr>
                   <th>品名</th>
                   <th style="text-align: center; width: 80px;">數量</th>
-                  <th style="text-align: right; width: 100px;">小計</th>
                 </tr>
               </thead>
               <tbody>
@@ -156,7 +155,6 @@
                   <tr x-show="index % 2 === 0">
                     <td x-text="item.name"></td>
                     <td style="text-align: center;" x-text="item.count"></td>
-                    <td style="text-align: right;" x-text="Math.round(item.subtotal)"></td>
                   </tr>
                 </template>
               </tbody>
@@ -168,7 +166,6 @@
                 <tr>
                   <th>品名</th>
                   <th style="text-align: center; width: 80px;">數量</th>
-                  <th style="text-align: right; width: 100px;">小計</th>
                 </tr>
               </thead>
               <tbody>
@@ -176,7 +173,6 @@
                   <tr x-show="index % 2 === 1">
                     <td x-text="item.name"></td>
                     <td style="text-align: center;" x-text="item.count"></td>
-                    <td style="text-align: right;" x-text="Math.round(item.subtotal)"></td>
                   </tr>
                 </template>
               </tbody>
@@ -378,10 +374,10 @@
           let text = this.header + '\n\n';
           text += `成員：${this.member}\n`;
           text += `日期：${this.date}\n\n`;
-          text += '品名\t\t數量\t小計\n';
+          text += '品名\t\t數量\n';
           text += '─'.repeat(40) + '\n';
           this.items.forEach(item => {
-            text += `${item.name}\t\t${item.count}\t${Math.round(item.subtotal)}\n`;
+            text += `${item.name}\t\t${item.count}\n`;
           });
           text += '─'.repeat(40) + '\n';
           text += `總金額：${Math.round(this.total)} 元\n`;
