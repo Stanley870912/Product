@@ -184,7 +184,7 @@
           </div>
 
           <div class="shipping-total">
-            總金額：<span x-text="total.toFixed(2)"></span> 元
+            餅類：<span x-text="cakeTotal.toFixed(2)"></span> 元　　糖果類：<span x-text="candyTotal.toFixed(2)"></span> 元　　總金額：<span x-text="total.toFixed(2)"></span> 元
           </div>
         </div>
       </div>
@@ -201,6 +201,8 @@
         date: '',
         items: [],
         total: 0,
+        cakeTotal: 0,
+        candyTotal: 0,
         productData: [],
         dataLoaded: false,
         loadError: false,
@@ -275,15 +277,17 @@
               const [, name, countStr] = ITEM_RE.exec(line);
               const count = Number(countStr);
               
-              // 從產品資料中查找價格
+              // 從產品資料中查找價格和分類
               const product = this.productData.find(p => p.product_name === name.trim());
               const price = product ? product.price : 0;
+              const productGroup = product ? product.product_group : 0;
               const subtotal = count * price;
               
               data.items.push({
                 name: name.trim(),
                 count: count,
                 price: price,
+                productGroup: productGroup,
                 subtotal: subtotal
               });
             } else if (TOTAL_RE.test(line)) {
@@ -334,6 +338,15 @@
           this.member = data.member;
           this.date = data.date;
           this.items = data.items;
+          
+          // 計算餅類和糖果類的總金額
+          this.cakeTotal = data.items
+            .filter(item => item.productGroup !== 9)
+            .reduce((sum, item) => sum + item.subtotal, 0);
+          
+          this.candyTotal = data.items
+            .filter(item => item.productGroup === 9)
+            .reduce((sum, item) => sum + item.subtotal, 0);
           
           // 如果沒有提供總金額，就自動計算
           if (data.total === 0) {
