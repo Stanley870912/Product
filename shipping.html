@@ -108,6 +108,11 @@
         <div class="card">
           <div class="card-header text-center bg-white border-0 pb-0">
             <h2 class="fw-bold">出貨單產生器</h2>
+            <div class="mt-2">
+              <span x-show="!dataLoaded && !loadError" class="badge bg-warning">正在載入產品資料...</span>
+              <span x-show="dataLoaded" class="badge bg-success">產品資料已載入 ✓</span>
+              <span x-show="loadError" class="badge bg-danger">資料載入失敗</span>
+            </div>
           </div>
           <div class="card-body">
             <div class="d-flex justify-content-end gap-2 mb-3">
@@ -197,14 +202,23 @@
         items: [],
         total: 0,
         productData: [],
+        dataLoaded: false,
+        loadError: false,
 
         async init() {
           // 載入產品資料
           try {
             const res = await fetch('non_pickup.json');
+            if (!res.ok) {
+              throw new Error(`HTTP ${res.status}`);
+            }
             this.productData = await res.json();
+            this.dataLoaded = true;
+            console.log('產品資料載入成功，共', this.productData.length, '項');
           } catch (error) {
             console.error('無法載入產品資料:', error);
+            this.loadError = true;
+            alert('無法載入產品資料。\n請確認此頁面是透過本地伺服器開啟（如 Live Server）。\n直接開啟 HTML 文件可能會有 CORS 限制。');
           }
         },
 
@@ -287,25 +301,33 @@
         },
 
         generateDocument() {
+          console.log('開始產生出貨單');
+          
           if (!this.inputText.trim()) {
             alert('請先輸入或貼上訂單資料');
             return;
           }
 
+          if (!this.dataLoaded || this.productData.length === 0) {
+            alert('產品資料尚未載入，請稍候再試或重新整理頁面');
+            return;
+          }
+
           const data = this.parseInput();
+          console.log('解析結果:', data);
 
           if (!data.member) {
-            alert('找不到成員資訊');
+            alert('找不到成員資訊\n請確認格式：成員:XXX');
             return;
           }
 
           if (!data.date) {
-            alert('找不到日期資訊');
+            alert('找不到日期資訊\n請確認格式：日期:YYYY-MM-DD');
             return;
           }
 
           if (data.items.length === 0) {
-            alert('找不到商品資訊');
+            alert('找不到商品資訊\n請確認格式：【商品名稱】:數量');
             return;
           }
 
