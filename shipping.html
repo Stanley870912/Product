@@ -133,7 +133,16 @@
     <!-- 出貨單顯示區域 -->
     <div class="row justify-content-center" x-show="documentGenerated">
       <div class="col-12 col-lg-10">
-        <div !-- 左側表格 -->
+        <div class="shipping-document" id="shippingDoc">
+          <div class="shipping-header" x-text="header"></div>
+          
+          <div class="shipping-info">
+            <div><strong>成員：</strong><span x-text="member"></span></div>
+            <div><strong>日期：</strong><span x-text="date"></span></div>
+          </div>
+
+          <div class="shipping-items">
+            <!-- 左側表格 -->
             <table>
               <thead>
                 <tr>
@@ -164,16 +173,7 @@
               </thead>
               <tbody>
                 <template x-for="(item, index) in items" :key="item.name + '_right'">
-                  <tr x-show="index % 2 === 1"
-                <tr>
-                  <th>品名</th>
-                  <th style="text-align: center; width: 100px;">數量</th>
-                  <th style="text-align: right; width: 120px;">小計</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template x-for="item in items" :key="item.name">
-                  <tr>
+                  <tr x-show="index % 2 === 1">
                     <td x-text="item.name"></td>
                     <td style="text-align: center;" x-text="item.count"></td>
                     <td style="text-align: right;" x-text="item.subtotal.toFixed(2)"></td>
@@ -184,7 +184,7 @@
           </div>
 
           <div class="shipping-total">
-            總金額：<span x-text="total"></span> 元
+            總金額：<span x-text="total.toFixed(2)"></span> 元
           </div>
         </div>
       </div>
@@ -331,6 +331,10 @@
             return;
           }
 
+          this.member = data.member;
+          this.date = data.date;
+          this.items = data.items;
+          
           // 如果沒有提供總金額，就自動計算
           if (data.total === 0) {
             this.total = data.items.reduce((sum, item) => sum + item.subtotal, 0);
@@ -338,10 +342,6 @@
             this.total = data.total;
           }
           
-          this.member = data.member;
-          this.date = data.date;
-          this.items = data.items;
-          this.total = data.total;
           this.documentGenerated = true;
 
           // 滾動到出貨單
