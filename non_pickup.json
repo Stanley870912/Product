@@ -126,8 +126,8 @@
     "price": 1400
   },
   { "product_group": 9, "product_name": "筷子肉乾(蒜味) (包)", "price": 1400 },
+  { "product_group": 9, "product_name": "玥珍軒袋(包)", "price": 380 },
   { "product_group": 9, "product_name": "愛心袋", "price": 150 },
-  { "product_group": 9, "product_name": "零食包裝袋(包)", "price": 300 },
   { "product_group": 9, "product_name": "各式貼紙(張)", "price": 1 },
   { "product_group": 9, "product_name": "黑豆袋子(包)", "price": 225 },
   { "product_group": 98, "product_name": "櫻花盒(個)", "price": 10 },
