@@ -107,6 +107,7 @@
           系統只會對有打勾的產品進行金額試算喔！如果不想一個一個選，可以點選『全選』來加快操作～
         </li>
          <li> 修改價格: 魷魚絲(箱) 3173 -> 3298</li> 
+         <li> 免驗證時間 從 16 小時改為 1 小時</li> 
       </ol>
 
       <!-- 功能按鈕 -->
@@ -183,8 +184,8 @@
         async authCheck() {
           const last = localStorage.getItem("lastLoginTime");
           const now = Date.now();
-          // 16 小時內免重複驗證
-          if (last && now - Number(last) < 16 * 60 * 60 * 1000) {
+          // 1 小時內免重複驗證
+          if (last && now - Number(last) < 60 * 60 * 1000) {
             this.authorized = true;
             return this.loadData();
           }
