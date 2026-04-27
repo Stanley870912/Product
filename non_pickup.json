@@ -189,10 +189,26 @@
     "product_name": "單色糕(蔓越莓)（需先預定）(盒)",
     "price": 95
   },
-  { "product_group": 3, "product_name": "鳳凰酥(包)", "price": 175 },
-  { "product_group": 3, "product_name": "好事花生酥(袋)", "price": 83 },
-  { "product_group": 3, "product_name": "小蘇餅(包)", "price": 90 },
-  { "product_group": 3, "product_name": "蒜蓉餅(盒)", "price": 90 },
+  {
+    "product_group": 3,
+    "product_name": "鳳凰酥(包)",
+    "price": 175
+  },
+  {
+    "product_group": 3,
+    "product_name": "好事花生酥(袋)",
+    "price": 83
+  },
+  {
+    "product_group": 3,
+    "product_name": "小蘇餅(包)",
+    "price": 90
+  },
+  {
+    "product_group": 3,
+    "product_name": "蒜蓉餅(盒)",
+    "price": 90
+  },
   {
     "product_group": 3,
     "product_name": "杏仁瓦片(包) （需先預定）",
