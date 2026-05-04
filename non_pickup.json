@@ -16,13 +16,13 @@
   },
   {
     "product_group": 1,
-    "product_name": "麵茶(包)",
-    "price": 75
+    "product_name": "鳳眼糕(盒)",
+    "price": 90
   },
   {
     "product_group": 1,
-    "product_name": "鳳眼糕(盒)",
-    "price": 90
+    "product_name": "麵茶(包)",
+    "price": 75
   },
   {
     "product_group": 1,
@@ -86,17 +86,12 @@
   },
   {
     "product_group": 2,
-    "product_name": "薄餅(黑胡椒)(包)",
+    "product_name": "薄餅(黑糖蜂蜜)(包)",
     "price": 55
   },
   {
     "product_group": 2,
     "product_name": "薄餅(白胡椒)(包)",
-    "price": 55
-  },
-  {
-    "product_group": 2,
-    "product_name": "薄餅(黑糖蜂蜜)(包)",
     "price": 55
   },
   {
@@ -108,6 +103,11 @@
     "product_group": 2,
     "product_name": "手提椒鹽脆餅(包)",
     "price": 80
+  },
+  {
+    "product_group": 2,
+    "product_name": "薄餅(黑胡椒)(包)",
+    "price": 55
   },
   {
     "product_group": 2,
@@ -201,16 +201,6 @@
   },
   {
     "product_group": 3,
-    "product_name": "鳳凰酥(包)",
-    "price": 175
-  },
-  {
-    "product_group": 3,
-    "product_name": "好事花生酥(袋)",
-    "price": 83
-  },
-  {
-    "product_group": 3,
     "product_name": "小蘇餅(包)",
     "price": 90
   },
@@ -226,13 +216,13 @@
   },
   {
     "product_group": 3,
-    "product_name": "雪Ｑ餅(包)",
-    "price": 1250
+    "product_name": "鳳凰酥(包)",
+    "price": 175
   },
   {
     "product_group": 3,
-    "product_name": "凍干草苺雪Q餅(袋)",
-    "price": 1550
+    "product_name": "好事花生酥(袋)",
+    "price": 83
   },
   {
     "product_group": 3,
@@ -243,6 +233,16 @@
     "product_group": 3,
     "product_name": "杏仁梅糕(包)",
     "price": 1812
+  },
+  {
+    "product_group": 3,
+    "product_name": "雪Ｑ餅(包)",
+    "price": 1350
+  },
+  {
+    "product_group": 3,
+    "product_name": "凍干草苺雪Q餅(袋)",
+    "price": 1550
   },
   {
     "product_group": 4,
@@ -376,28 +376,18 @@
   },
   {
     "product_group": 7,
-    "product_name": "冬瓜糕(盒)",
-    "price": 50
-  },
-  {
-    "product_group": 7,
     "product_name": "梅餅(包)",
     "price": 140
   },
   {
     "product_group": 7,
+    "product_name": "冬瓜糕(盒)",
+    "price": 50
+  },
+  {
+    "product_group": 7,
     "product_name": "養生五穀沙其馬(箱)",
     "price": 1200
-  },
-  {
-    "product_group": 7,
-    "product_name": "紅麥花生酥(包)",
-    "price": 102
-  },
-  {
-    "product_group": 7,
-    "product_name": "糙米花生酥(包)",
-    "price": 102
   },
   {
     "product_group": 7,
@@ -408,6 +398,16 @@
     "product_group": 7,
     "product_name": "牛軋餅-黑糖(箱)",
     "price": 900
+  },
+  {
+    "product_group": 7,
+    "product_name": "紅麥花生酥(包)",
+    "price": 102
+  },
+  {
+    "product_group": 7,
+    "product_name": "糙米花生酥(包)",
+    "price": 102
   },
   {
     "product_group": 8,
@@ -428,6 +428,26 @@
     "product_group": 9,
     "product_name": "芒果乾(箱)",
     "price": 7050
+  },
+  {
+    "product_group": 9,
+    "product_name": "梅子夾芒果",
+    "price": 1466
+  },
+  {
+    "product_group": 9,
+    "product_name": "地瓜乾(箱)",
+    "price": 2550
+  },
+  {
+    "product_group": 9,
+    "product_name": "綜合堅果(包)",
+    "price": 2000
+  },
+  {
+    "product_group": 9,
+    "product_name": "蘋果乾",
+    "price": 2330
   },
   {
     "product_group": 9,
@@ -466,26 +486,6 @@
   },
   {
     "product_group": 9,
-    "product_name": "梅子夾芒果",
-    "price": 1466
-  },
-  {
-    "product_group": 9,
-    "product_name": "地瓜乾(箱)",
-    "price": 2550
-  },
-  {
-    "product_group": 9,
-    "product_name": "綜合堅果(包)",
-    "price": 2000
-  },
-  {
-    "product_group": 9,
-    "product_name": "蘋果乾",
-    "price": 2330
-  },
-  {
-    "product_group": 9,
     "product_name": "葡萄梅子（陳皮）(箱)",
     "price": 5845
   },
@@ -496,16 +496,6 @@
   },
   {
     "product_group": 9,
-    "product_name": "黃魚酥原味(箱)",
-    "price": 2672
-  },
-  {
-    "product_group": 9,
-    "product_name": "黃魚酥辣味(箱)",
-    "price": 2672
-  },
-  {
-    "product_group": 9,
     "product_name": "魷魚絲(箱)",
     "price": 3298
   },
@@ -513,6 +503,16 @@
     "product_group": 9,
     "product_name": "南棗核桃糕(箱)",
     "price": 6490
+  },
+  {
+    "product_group": 9,
+    "product_name": "黃魚酥原味(箱)",
+    "price": 2672
+  },
+  {
+    "product_group": 9,
+    "product_name": "黃魚酥辣味(箱)",
+    "price": 2672
   },
   {
     "product_group": 9,
@@ -616,12 +616,12 @@
   },
   {
     "product_group": 99,
-    "product_name": "運費(北部)",
-    "price": 900
+    "product_name": "運費(南部)",
+    "price": 800
   },
   {
     "product_group": 99,
-    "product_name": "運費(南部)",
-    "price": 800
+    "product_name": "運費(北部)",
+    "price": 900
   }
 ]
