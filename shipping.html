@@ -227,6 +227,8 @@
           this.date = '';
           this.items = [];
           this.total = 0;
+          this.cakeTotal = 0;
+          this.candyTotal = 0;
         },
 
         pasteFromClipboard() {
@@ -344,12 +346,7 @@
             .filter(item => item.productGroup === 9)
             .reduce((sum, item) => sum + item.subtotal, 0);
           
-          // 如果沒有提供總金額，就自動計算
-          if (data.total === 0) {
-            this.total = data.items.reduce((sum, item) => sum + item.subtotal, 0);
-          } else {
-            this.total = data.total;
-          }
+          this.total = this.cakeTotal + this.candyTotal;
           
           this.documentGenerated = true;
 
