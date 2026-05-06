@@ -96,6 +96,11 @@
   },
   {
     "product_group": 2,
+    "product_name": "薄餅(黑胡椒)(包)",
+    "price": 55
+  },
+  {
+    "product_group": 2,
     "product_name": "手提芝麻脆餅(包)",
     "price": 80
   },
@@ -103,11 +108,6 @@
     "product_group": 2,
     "product_name": "手提椒鹽脆餅(包)",
     "price": 80
-  },
-  {
-    "product_group": 2,
-    "product_name": "薄餅(黑胡椒)(包)",
-    "price": 55
   },
   {
     "product_group": 2,
@@ -226,6 +226,11 @@
   },
   {
     "product_group": 3,
+    "product_name": "雪Ｑ餅(包)",
+    "price": 1350
+  },
+  {
+    "product_group": 3,
     "product_name": "芒果雪q餅(包)",
     "price": 1550
   },
@@ -233,11 +238,6 @@
     "product_group": 3,
     "product_name": "杏仁梅糕(包)",
     "price": 1812
-  },
-  {
-    "product_group": 3,
-    "product_name": "雪Ｑ餅(包)",
-    "price": 1350
   },
   {
     "product_group": 3,
@@ -562,7 +562,7 @@
   {
     "product_group": 9,
     "product_name": "無花果核桃派(箱)",
-    "price": 3006
+    "price": 4008
   },
   {
     "product_group": 9,
