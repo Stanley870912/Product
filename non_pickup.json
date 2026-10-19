@@ -111,6 +111,16 @@
   },
   {
     "product_group": 2,
+    "product_name": "手提黑糖脆餅(包)",
+    "price": 80
+  },
+  {
+    "product_group": 2,
+    "product_name": "手提蜂蜜脆餅(包)",
+    "price": 80
+  },
+  {
+    "product_group": 2,
     "product_name": "杏仁酥(包)",
     "price": 55
   },
@@ -201,11 +211,6 @@
   },
   {
     "product_group": 3,
-    "product_name": "單色糕(牛奶)15粒",
-    "price": 65
-  },
-  {
-    "product_group": 3,
     "product_name": "單色糕(綠豆)15粒",
     "price": 65
   },
@@ -217,6 +222,11 @@
   {
     "product_group": 3,
     "product_name": "單色糕(芝麻)15粒",
+    "price": 65
+  },
+  {
+    "product_group": 3,
+    "product_name": "單色糕(牛奶)15粒",
     "price": 65
   },
   {
@@ -381,6 +391,11 @@
   },
   {
     "product_group": 7,
+    "product_name": "芋頭碰(包)",
+    "price": 65
+  },
+  {
+    "product_group": 7,
     "product_name": "芝麻冬瓜糕",
     "price": 60
   },
@@ -393,11 +408,6 @@
     "product_group": 7,
     "product_name": "梅子冬瓜糕",
     "price": 60
-  },
-  {
-    "product_group": 7,
-    "product_name": "芋頭碰(包)",
-    "price": 65
   },
   {
     "product_group": 7,
@@ -506,6 +516,16 @@
   },
   {
     "product_group": 9,
+    "product_name": "紅棗加核桃(箱)",
+    "price": 1670
+  },
+  {
+    "product_group": 9,
+    "product_name": "駝奶(箱)",
+    "price": 4258
+  },
+  {
+    "product_group": 9,
     "product_name": "黃魚酥原味(箱)",
     "price": 2672
   },
@@ -518,16 +538,6 @@
     "product_group": 9,
     "product_name": "南棗核桃糕(箱)",
     "price": 6490
-  },
-  {
-    "product_group": 9,
-    "product_name": "駝奶(箱)",
-    "price": 4258
-  },
-  {
-    "product_group": 9,
-    "product_name": "紅棗加核桃(箱)",
-    "price": 1670
   },
   {
     "product_group": 9,
@@ -546,12 +556,12 @@
   },
   {
     "product_group": 9,
-    "product_name": "花茶(包)",
+    "product_name": "洛神花茶(包)",
     "price": 11
   },
   {
     "product_group": 9,
-    "product_name": "洛神花茶(包)",
+    "product_name": "花茶(包)",
     "price": 11
   },
   {
@@ -671,13 +681,13 @@
   },
   {
     "product_group": 99,
-    "product_name": "運費(北部)",
-    "price": 900
+    "product_name": "運費(自取)",
+    "price": 0
   },
   {
     "product_group": 99,
-    "product_name": "運費(自取)",
-    "price": 0
+    "product_name": "運費(北部)",
+    "price": 900
   },
   {
     "product_group": 99,
